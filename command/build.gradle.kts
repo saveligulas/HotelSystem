@@ -15,7 +15,8 @@ val quarkusPlatformVersion: String by project
 dependencies {
     implementation(enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}"))
     implementation("io.quarkus:quarkus-arc")
-    implementation("io.quarkus:quarkus-rest")
+    implementation("io.quarkus:quarkus-resteasy-jackson")
+    implementation(project(":core"))
     testImplementation("io.quarkus:quarkus-junit5")
     testImplementation("io.rest-assured:rest-assured")
 }
