@@ -16,6 +16,8 @@ dependencies {
     implementation(enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}"))
     implementation("io.quarkus:quarkus-arc")
     implementation("io.quarkus:quarkus-resteasy-jackson")
+    implementation("com.fasterxml.jackson.core:jackson-databind")
+    implementation("io.quarkus:quarkus-smallrye-openapi")
     implementation(project(":core"))
     testImplementation("io.quarkus:quarkus-junit5")
     testImplementation("io.rest-assured:rest-assured")
