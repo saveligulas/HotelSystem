@@ -65,7 +65,7 @@ public class Customer implements IShallowProjection<Customer, UUID> {
 
     @Override
     public Customer buildShallowModel(UUID uuid) {
-        return null;
+        return new Customer(uuid);
     }
 
     @Override

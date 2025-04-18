@@ -1,5 +1,6 @@
-package fhv.hotel.command.model;
+package fhv.hotel.command;
 
+import fhv.hotel.command.model.BookingCreate;
 import fhv.hotel.command.model.domain.Booking;
 import fhv.hotel.command.service.BookingService;
 import jakarta.inject.Inject;
