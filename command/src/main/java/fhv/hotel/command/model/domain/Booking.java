@@ -13,7 +13,7 @@ public class Booking implements IShallowProjection<Booking, UUID> {
 
     private UUID uuid;
     private Long bookingNumber;
-    private boolean payed;
+    private boolean paid;
     private boolean cancelled;
     @JsonBackReference
     private Room room;
@@ -26,10 +26,10 @@ public class Booking implements IShallowProjection<Booking, UUID> {
         this.uuid = uuid;
     }
 
-    public Booking(UUID uuid, Long bookingNumber, boolean payed, boolean cancelled, Room room, Customer customer, LocalDate startDate, LocalDate endDate) {
+    public Booking(UUID uuid, Long bookingNumber, boolean paid, boolean cancelled, Room room, Customer customer, LocalDate startDate, LocalDate endDate) {
         this.uuid = uuid;
         this.bookingNumber = bookingNumber;
-        this.payed = payed;
+        this.paid = paid;
         this.cancelled = cancelled;
         this.room = room;
         this.customer = customer;
@@ -45,8 +45,8 @@ public class Booking implements IShallowProjection<Booking, UUID> {
         return bookingNumber;
     }
 
-    public boolean payed() {
-        return payed;
+    public boolean paid() {
+        return paid;
     }
 
     public boolean cancelled() {
