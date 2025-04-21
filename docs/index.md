@@ -1,4 +1,4 @@
-# Tutorial: CQRS - Hotel system
+# Documentation: CQRS - Hotel system
 
 This project implements a hotel management system using the **CQRS** (Command Query Responsibility Segregation) pattern.
 It separates actions that *change* data (like booking a room or creating a customer), called **Commands**, from how data is read (which is less detailed in these snippets).
