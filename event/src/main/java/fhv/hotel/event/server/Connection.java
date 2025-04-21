@@ -5,7 +5,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.net.NetSocket;
 import jakarta.inject.Inject;
 
-public class Connection {
+class Connection {
     public enum State {
         INITIAL,
         CONSUMER_TYPES_RECEIVED,

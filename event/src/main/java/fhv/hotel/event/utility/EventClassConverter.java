@@ -1,7 +1,4 @@
-package fhv.hotel.event.protocol.header;
-
-import fhv.hotel.event.utility.Utf8Mapper;
-import io.smallrye.mutiny.tuples.Tuple2;
+package fhv.hotel.event.utility;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,18 +16,9 @@ public class EventClassConverter {
             byte identifier = data[i];
             byte[] hashBytes = new byte[256];
             System.arraycopy(data, i + 1, hashBytes, 0, 256);
-            String hexHash = toHex(hashBytes);
-            result.put(identifier, Utf8Mapper.hexHash);
+            result.put(identifier, HexConverter.toHex(hashBytes));
         }
 
         return result;
-    }
-
-    private static String toHex(byte[] bytes) {
-        StringBuilder sb = new StringBuilder(bytes.length * 2);
-        for (byte b : bytes) {
-            sb.append(String.format("%02x", b));
-        }
-        return sb.toString();
     }
 }
