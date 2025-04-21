@@ -5,5 +5,5 @@ public enum Event {
     BOOKING_CANCELLED,
     CUSTOMER_CREATED,
     CUSTOMER_UPDATED,
-    BOOKING_PAYED;
+    BOOKING_PAID;
 }

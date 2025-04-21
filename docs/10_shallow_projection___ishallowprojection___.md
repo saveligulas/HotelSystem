@@ -88,7 +88,7 @@ public class InMemoryBookingRepository implements IBasicRepository<Booking, UUID
         Booking bookingShallow = new Booking(
                 booking.uuid(),
                 booking.bookingNumber(),
-                booking.payed(),
+                booking.paid(),
                 booking.cancelled(),
                 // Use buildShallowModel to get Customer with ID only
                 booking.customer().buildShallowModel(booking.customer().getID()), 
@@ -236,4 +236,3 @@ This technique is a practical implementation detail that makes our simple in-mem
 ---
 
 This concludes our introductory journey through the core concepts of the `cqrs` project! We've covered how commands are handled, how data is modeled and stored, how events enable communication between decoupled parts, and even some implementation details like the TCP event bus and shallow projections. We hope this gives you a solid foundation for understanding and working with this project.
-

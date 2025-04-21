@@ -15,17 +15,17 @@ public class BookingService {
 
     @Inject
     IBasicRepository<Booking, UUID> bookingRepository;
-    
+
     @Inject
     IBasicRepository<Customer, UUID> customerRepository;
-    
+
     @Inject
     IBasicRepository<Room, Long> roomRepository;
 
     public void createBooking(BookingCreate bookingCreate) {
         Customer customer = customerRepository.findById(bookingCreate.customerId());
         Room room = roomRepository.findById(bookingCreate.roomNumber());
-        
+
         Booking booking = new Booking(
             UUID.randomUUID(),
             Booking.ID_GENERATOR.incrementAndGet(),
@@ -36,11 +36,11 @@ public class BookingService {
             bookingCreate.startDate(),
             bookingCreate.endDate()
         );
-        
+
         bookingRepository.save(booking);
         customer.addBooking(booking);
         room.addBooking(booking);
-        
+
         customerRepository.update(customer);
         roomRepository.update(room);
     }
@@ -48,7 +48,7 @@ public class BookingService {
     public Booking getBooking(UUID id) {
         return bookingRepository.findById(id);
     }
-    
+
     public void payBooking(UUID id) {
         Booking booking = bookingRepository.findById(id);
         Booking updatedBooking = new Booking(
@@ -63,13 +63,13 @@ public class BookingService {
         );
         bookingRepository.update(updatedBooking);
     }
-    
+
     public void cancelBooking(UUID id) {
         Booking booking = bookingRepository.findById(id);
         Booking updatedBooking = new Booking(
             booking.uuid(),
             booking.bookingNumber(),
-            booking.payed(),
+            booking.paid(),
             true,
             booking.room(),
             booking.customer(),

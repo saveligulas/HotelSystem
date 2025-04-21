@@ -133,7 +133,7 @@ package fhv.hotel.command.model.domain;
 public class Booking /* ... implements ... */ {
     private UUID uuid; // Unique ID for the booking
     private Long bookingNumber;
-    private boolean payed; // Has the booking been paid?
+    private boolean paid; // Has the booking been paid?
     private boolean cancelled; // Has it been cancelled?
 
     @JsonBackReference // Part of managing the Room -> Booking link
@@ -146,7 +146,7 @@ public class Booking /* ... implements ... */ {
     private LocalDate endDate;
 
     // Constructor
-    public Booking(UUID uuid, Long bookingNumber, boolean payed, boolean cancelled, 
+    public Booking(UUID uuid, Long bookingNumber, boolean paid, boolean cancelled, 
                    Room room, Customer customer, /*... dates ...*/) {
         this.uuid = uuid;
         // ... set other fields ...
@@ -163,7 +163,7 @@ public class Booking /* ... implements ... */ {
 }
 ```
 
-*   **Fields:** Holds booking-specific data like `uuid`, `bookingNumber`, `payed`, `cancelled`, `startDate`, `endDate`.
+*   **Fields:** Holds booking-specific data like `uuid`, `bookingNumber`, `paid`, `cancelled`, `startDate`, `endDate`.
 *   **`room` and `customer` Fields:** These are crucial! They don't just store the room *number* or customer *ID*. They hold direct references to the actual `Room` object and `Customer` object involved in this booking. This creates the links: "A Booking belongs to one Room" and "A Booking belongs to one Customer".
 *   **`@JsonBackReference`:** This complements `@JsonManagedReference`. It tells the system, "When showing a booking, don't try to show the full details of the customer and room again (to avoid an infinite loop), just know they are linked."
 
@@ -286,4 +286,3 @@ In this chapter, we explored the **Command Domain Models** (`Booking`, `Customer
 We now understand *what* the services work with. But *how* are these model objects actually saved and retrieved from a database or other storage? That's the job of the Repositories.
 
 Let's dive into how we persist and retrieve our domain models in the next chapter: [Chapter 4: Repository (`IBasicRepository`)](04_repository___ibasicrepository___.md).
-

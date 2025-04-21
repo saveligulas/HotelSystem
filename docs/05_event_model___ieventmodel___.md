@@ -69,7 +69,7 @@ public interface IEventModel {
         BOOKING_CANCELLED,
         CUSTOMER_CREATED,
         CUSTOMER_UPDATED,
-        BOOKING_PAYED; 
+        BOOKING_PAID
     }
     ```
     This makes it easy and safe to refer to event types in our code (e.g., `Event.CUSTOMER_CREATED`).
@@ -197,4 +197,3 @@ In this chapter, we learned about **Event Models** and the `IEventModel` interfa
 We now understand how to define the *structure* of an event message. But how do we actually *send* or *publish* these event messages so that other interested parts of the system can receive and react to them?
 
 Let's move on to the next step in our event-driven journey: [Chapter 6: Event Publishing (`IPublishEvent`)](06_event_publishing___ipublishevent___.md).
-
