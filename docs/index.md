@@ -6,26 +6,17 @@ Important occurrences within the system, like a customer being created, are capt
 
 ```mermaid
 flowchart TD
-    A0["Event Model (`IEventModel`)
-"]
-    A1["Event Publishing (`IPublishEvent`)
-"]
-    A2["Event Consumption (`IConsumeEvent` / `IReceiveMessage`)
-"]
-    A3["Event Listener (`EventListener`)
-"]
-    A4["Repository (`IBasicRepository`)
-"]
-    A5["Command Domain Models (`Booking`, `Customer`, `Room`)
-"]
-    A6["Command Services (`BookingService`, `CustomerService`, `RoomService`)
-"]
-    A7["Command Resources (`BookingResource`, `CustomerResource`, `RoomResource`)
-"]
-    A8["Shallow Projection (`IShallowProjection`)
-"]
-    A9["TCP Event Bus (`TCPServer`, `TCPClient`, `Connection` - event module)
-"]
+    A0["Event Model (IEventModel)"]
+    A1["Event Publishing (IPublishEvent)"]
+    A2["Event Consumption (IConsumeEvent / IReceiveMessage)"]
+    A3["Event Listener (EventListener)"]
+    A4["Repository (IBasicRepository)"]
+    A5["Command Domain Models (Booking, Customer, Room)"]
+    A6["Command Services (BookingService, CustomerService, RoomService)"]
+    A7["Command Resources (BookingResource, CustomerResource, RoomResource)"]
+    A8["Shallow Projection (IShallowProjection)"]
+    A9["TCP Event Bus (TCPServer, TCPClient, Connection - event module)"]
+
     A7 -- "Calls" --> A6
     A6 -- "Uses" --> A4
     A6 -- "Manages" --> A5
@@ -62,5 +53,3 @@ flowchart TD
 ](09_tcp_event_bus___tcpserver____tcpclient____connection____event_module__.md)
 10. [Shallow Projection (`IShallowProjection`)
 ](10_shallow_projection___ishallowprojection___.md)
-
-
