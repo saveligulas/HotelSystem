@@ -11,6 +11,7 @@ public interface IEventModel {
 
     @JsonProperty("event")
     Event getEvent();
+
     default Map<String, Object> getData() {
         return IEventModel.MAPPER.convertValue(this, new TypeReference<Map<String, Object>>() {
         });

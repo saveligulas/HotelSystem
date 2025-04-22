@@ -4,13 +4,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record CustomerCreatedEvent(LocalDateTime dateTime,
+public record CustomerUpdatedEvent(LocalDateTime dateTime,
                                    UUID customerUUID,
                                    Long customerNumber,
                                    String firstName,
                                    String lastName,
                                    LocalDate birthday) implements IEventModel {
-    public static final Event EVENT = Event.CUSTOMER_CREATED;
+    public static final Event EVENT = Event.CUSTOMER_UPDATED;
 
     @Override
     public Event getEvent() {
