@@ -1,5 +1,6 @@
 package fhv.hotel.event.client;
 
+import fhv.hotel.core.event.bytebased.IReceiveByteMessage;
 import io.quarkus.logging.Log;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
@@ -13,15 +14,15 @@ public class TCPClient {
     Vertx vertx;
     private Connection connection;
 
-    public TCPClient(IEventModel eventModels) {
-
+    public TCPClient(IReceiveByteMessage<?>... receivers) {
+        start(receivers);
     }
 
-    public void start() {
+    public void start(IReceiveByteMessage<?>... receivers) {
         NetClient client = vertx.createNetClient();
         client.connect(5672, "localhost", conn -> {
             if (conn.succeeded()) {
-                this.connection = new Connection(conn.result());
+                this.connection = new Connection(conn.result(), receivers);
             } else {
                 Log.info("Connection could not be established: " + conn.cause());
             }

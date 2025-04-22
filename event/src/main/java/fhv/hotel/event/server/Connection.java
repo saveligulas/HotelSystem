@@ -1,5 +1,6 @@
 package fhv.hotel.event.server;
 
+import fhv.hotel.event.protocol.header.Payload;
 import io.quarkus.logging.Log;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.net.NetSocket;
@@ -23,10 +24,13 @@ class Connection {
     @Inject
     ConsumerRegistry consumerRegistry;
 
+    private IEventSourcingRepository eventSourcingRepository;
 
-    public Connection(NetSocket socket) {
+
+    public Connection(NetSocket socket, IEventSourcingRepository eventSourcingRepository) {
         this.socket = socket;
         state = State.INITIAL;
+        this.eventSourcingRepository = eventSourcingRepository;
     }
 
     public void handleIncomingData(Buffer data) {
@@ -40,11 +44,13 @@ class Connection {
     }
 
     private void handleDataFrame(Buffer data) {
+        Byte identifier = Payload.getPublishType(data);
+        byte[] classByteCode = Payload.getClassByteCode(data);
+        eventSourcingRepository.saveByteEvent(identifier, classByteCode);
+
     }
 
     private void handleConsumerTypes(Buffer data) {
-
-
         state = State.CONNECTED;
     }
 

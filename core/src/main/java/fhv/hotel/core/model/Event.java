@@ -6,4 +6,8 @@ public enum Event {
     CUSTOMER_CREATED,
     CUSTOMER_UPDATED,
     BOOKING_PAID;
+
+    public byte getOrdinalByte() {
+        return (byte) this.ordinal();
+    }
 }
