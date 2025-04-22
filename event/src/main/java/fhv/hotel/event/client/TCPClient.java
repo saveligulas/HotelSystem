@@ -13,6 +13,10 @@ public class TCPClient {
     Vertx vertx;
     private Connection connection;
 
+    public TCPClient(IEventModel eventModels) {
+
+    }
+
     public void start() {
         NetClient client = vertx.createNetClient();
         client.connect(5672, "localhost", conn -> {

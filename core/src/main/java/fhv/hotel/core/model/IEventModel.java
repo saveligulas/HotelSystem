@@ -16,4 +16,8 @@ public interface IEventModel {
         return IEventModel.MAPPER.convertValue(this, new TypeReference<Map<String, Object>>() {
         });
     }
+
+    default Byte getEventType() {
+        return (byte) getEvent().ordinal();
+    }
 }
