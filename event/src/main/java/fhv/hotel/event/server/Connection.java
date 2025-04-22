@@ -4,7 +4,6 @@ import fhv.hotel.event.protocol.header.Payload;
 import io.quarkus.logging.Log;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.net.NetSocket;
-import jakarta.inject.Inject;
 
 class Connection {
     public enum State {
@@ -18,19 +17,17 @@ class Connection {
 
     private final NetSocket socket;
     private State state;
-
-    @Inject
-    Publisher publisher;
-    @Inject
-    ConsumerRegistry consumerRegistry;
-
+    private ConsumerRegistry consumerRegistry;
+    private Publisher publisher;
     private IEventSourcingRepository eventSourcingRepository;
 
 
-    public Connection(NetSocket socket, IEventSourcingRepository eventSourcingRepository) {
+    public Connection(NetSocket socket, IEventSourcingRepository eventSourcingRepository, ConsumerRegistry consumerRegistry, Publisher publisher) {
         this.socket = socket;
         state = State.INITIAL;
         this.eventSourcingRepository = eventSourcingRepository;
+        this.consumerRegistry = consumerRegistry;
+        this.publisher = publisher;
     }
 
     public void handleIncomingData(Buffer data) {
@@ -47,11 +44,15 @@ class Connection {
         Byte identifier = Payload.getPublishType(data);
         byte[] classByteCode = Payload.getClassByteCode(data);
         eventSourcingRepository.saveByteEvent(identifier, classByteCode);
-
+        publisher.publish(Buffer.buffer(classByteCode), identifier);
     }
 
     private void handleConsumerTypes(Buffer data) {
         state = State.CONNECTED;
+        byte[] payload = Payload.getPayload(data);
+        for (byte b : payload) {
+            consumerRegistry.add(b, this.socket);
+        }
     }
 
     private void handlePublisherTypes(Buffer data) {

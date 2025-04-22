@@ -21,6 +21,10 @@ public class TCPServer {
     Vertx vertx;
     @Inject
     IEventSourcingRepository eventSourcingRepository;
+    @Inject
+    Publisher publisher;
+    @Inject
+    ConsumerRegistry consumerRegistry;
 
 
     @PostConstruct
@@ -37,7 +41,7 @@ public class TCPServer {
     }
 
     private void handleNewConnection(NetSocket socket) {
-        Connection connection = new Connection(socket, eventSourcingRepository);
+        Connection connection = new Connection(socket, eventSourcingRepository, consumerRegistry, publisher);
         connections.put(socket, connection);
 
         socket.handler(buffer -> {
