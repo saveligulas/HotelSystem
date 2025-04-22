@@ -18,7 +18,7 @@ public class Payload {
         return getBytesFromBuffer(data, Header.HEADER_SIZE);
     }
 
-    private static byte[] getBytesFromBuffer(Buffer buffer, int startPos) {
+    public static byte[] getBytesFromBuffer(Buffer buffer, int startPos) {
         byte[] bufferBytes = buffer.getBytes();
         byte[] classByteCode = new byte[bufferBytes.length - startPos];
         System.arraycopy(bufferBytes, startPos, classByteCode, 0, classByteCode.length);

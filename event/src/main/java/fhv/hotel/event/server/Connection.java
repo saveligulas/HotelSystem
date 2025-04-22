@@ -1,6 +1,8 @@
 package fhv.hotel.event.server;
 
+import fhv.hotel.event.protocol.header.Header;
 import fhv.hotel.event.protocol.header.Payload;
+import fhv.hotel.event.utility.HexConverter;
 import io.quarkus.logging.Log;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.net.NetSocket;
@@ -31,7 +33,7 @@ class Connection {
     }
 
     public void handleIncomingData(Buffer data) {
-        Log.info("Received data: " + data);
+        Log.info("Received data: " + HexConverter.toHex(data.getBytes()));
         switch (state) {
             case INITIAL -> handleConsumerTypes(data);
             //case CONSUMER_TYPES_RECEIVED -> handlePublisherTypes(data);
@@ -42,9 +44,11 @@ class Connection {
 
     private void handleDataFrame(Buffer data) {
         Byte identifier = Payload.getPublishType(data);
+        byte[] payload = Payload.getPayload(data);
         byte[] classByteCode = Payload.getClassByteCode(data);
+
         eventSourcingRepository.saveByteEvent(identifier, classByteCode);
-        publisher.publish(Buffer.buffer(classByteCode), identifier);
+        publisher.publish(Buffer.buffer(payload), identifier);
     }
 
     private void handleConsumerTypes(Buffer data) {

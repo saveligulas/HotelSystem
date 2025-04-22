@@ -2,89 +2,130 @@ package fhv.hotel.core.event.bytebased;
 
 import com.esotericsoftware.kryo.kryo5.Kryo;
 import fhv.hotel.core.event.IConsumeEvent;
-import fhv.hotel.core.event.IReceiveMessage;
-import fhv.hotel.core.model.Event;
 import fhv.hotel.core.model.IEventModel;
-import fhv.hotel.core.utility.KryoSerializer;
+import fhv.hotel.core.kryo.KryoSerializer;
+import org.jboss.logging.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 
-public class KryoEventReceiver<T extends IEventModel> implements IReceiveByteMessage<T> {
-    private final KryoSerializer kryoSerializer;
-    private final Class<T> eventClass;
-    private final Event eventType;
-    private final List<IConsumeEvent<T>> consumers = new ArrayList<>();
+public class KryoEventReceiver implements IReceiveByteMessage {
+    private static final Logger LOG = Logger.getLogger(KryoEventReceiver.class);
 
-    private KryoEventReceiver(Class<T> eventClass, Event eventType, KryoSerializer kryoSerializer) {
-        this.eventClass = eventClass;
-        this.kryoSerializer = kryoSerializer;
-        this.eventType = eventType;
+    private final Map<Byte, Class<? extends IEventModel>> idEventClasses = new HashMap<>();
+    private final Map<Class<? extends IEventModel>, List<IConsumeEvent<?>>> consumersByClass = new HashMap<>();
+    private final KryoSerializer kryoSerializer;
+
+    public KryoEventReceiver() {
+        this.kryoSerializer = new KryoSerializer();
     }
 
     @Override
-    public void receiveAndConsume(byte[] data) {
-        if (consumers.isEmpty()) {
+    public <T extends IEventModel> void registerConsumer(byte eventTypeId, Class<T> eventClass, IConsumeEvent<T> consumer) {
+        kryoSerializer.registerClass(eventClass);
+
+        idEventClasses.put(eventTypeId, eventClass);
+
+        List<IConsumeEvent<?>> consumers = consumersByClass.computeIfAbsent(
+                eventClass,
+                k -> new ArrayList<>()
+        );
+        consumers.add(consumer);
+
+        LOG.info("Registered consumer for event type: " + eventClass.getSimpleName() + " with ID: " + eventTypeId);
+    }
+
+    @Override
+    public boolean handlesType(byte type) {
+        return idEventClasses.containsKey(type);
+    }
+
+    @Override
+    public byte[] getEventTypeIds() {
+        byte[] eventTypeIds = new byte[idEventClasses.size()];
+        Iterator<Byte> keyIterator = idEventClasses.keySet().iterator();
+
+        for (int i = 0; i < idEventClasses.size(); i++) {
+            eventTypeIds[i] = keyIterator.next();
+        }
+
+        return eventTypeIds;
+    }
+
+    @Override
+    public void receiveAndProcess(byte[] message) {
+        if (message == null || message.length <= 1) {
+            LOG.warn("Received empty or invalid message");
+            return;
+        }
+        byte eventTypeId = message[0];
+
+        Class<? extends IEventModel> eventClass = idEventClasses.get(eventTypeId);
+        if (eventClass == null) {
+            LOG.debug("No registered class for event type ID: " + eventTypeId);
             return;
         }
 
-        T event = kryoSerializer.deserialize(data, eventClass);
+        byte[] eventData = new byte[message.length - 1];
+        System.arraycopy(message, 1, eventData, 0, eventData.length);
 
-        for (IConsumeEvent<T> consumer : consumers) {
-            consumer.consume(event);
+        IEventModel event;
+        try {
+            event = kryoSerializer.deserialize(eventData, eventClass);
+        } catch (Exception e) {
+            LOG.error("Failed to deserialize event data for type: " + eventClass.getSimpleName(), e);
+            return;
+        }
+
+        List<IConsumeEvent<?>> consumers = consumersByClass.get(eventClass);
+        if (consumers == null || consumers.isEmpty()) {
+            LOG.debug("No consumers registered for event class: " + eventClass.getSimpleName());
+            return;
+        }
+
+        for (IConsumeEvent<?> consumer : consumers) {
+            notifyConsumer(consumer, event);
         }
     }
 
-    @Override
-    public void registerConsumer(IConsumeEvent<T> consumer) {
-        this.consumers.add(consumer);
-    }
-
-    @Override
-    public Event getType() {
-        return eventType;
-    }
-
-    public void unregisterConsumer(IConsumeEvent<T> consumer) {
-        this.consumers.remove(consumer);
-    }
-
-    public static class Builder<T extends IEventModel> {
-        private final Class<T> eventClass;
-        private final Kryo kryo = new Kryo();
-        private final Event eventType;
-
-        public Builder(Class<T> eventClass, Event eventType) {
-            this.eventClass = eventClass;
-            this.eventType = eventType;
-            this.kryo.register(eventClass);
+    @SuppressWarnings("unchecked") // cast is safe because we register consumer with its class
+    private <T extends IEventModel> void notifyConsumer(IConsumeEvent<?> consumer, IEventModel event) {
+        try {
+            ((IConsumeEvent<T>) consumer).consume((T) event);
+        } catch (ClassCastException e) {
+            LOG.error("Type mismatch when dispatching event to consumer", e);
+        } catch (Exception e) {
+            LOG.error("Error in consumer while processing event", e);
         }
+    }
 
-        public Builder<T> registerClass(Class<?> clazz) {
-            this.kryo.register(clazz);
+    public static class Builder {
+        private final KryoEventReceiver receiver = new KryoEventReceiver();
+
+        public Builder configureKryo(Consumer<Kryo> configurator) {
+            receiver.kryoSerializer.configureKryo(configurator);
             return this;
         }
 
-        public Builder<T> registerClasses(Class<?>... classes) {
-            for (Class<?> clazz : classes) {
-                this.kryo.register(clazz);
-            }
+        public <T extends IEventModel> Builder registerEventClass(Class<T> eventClass) {
+            receiver.kryoSerializer.registerClass(eventClass);
             return this;
         }
 
-        public Builder<T> configureKryo(Consumer<Kryo> kryoConfigurator) {
-            kryoConfigurator.accept(this.kryo);
+        public <T extends IEventModel> Builder registerConsumer(
+                byte eventTypeId,
+                Class<T> eventClass,
+                IConsumeEvent<T> consumer) {
+            receiver.registerConsumer(eventTypeId, eventClass, consumer);
             return this;
         }
 
-        public KryoEventReceiver<T> build() {
-            KryoSerializer kryoSerializer = new KryoSerializer(this.kryo);
-            return new KryoEventReceiver<>(eventClass, eventType, kryoSerializer);
+        public KryoEventReceiver build() {
+            return receiver;
         }
     }
 
-    public static <T extends IEventModel> Builder<T> builder(Class<T> eventClass, Event event) {
-        return new Builder<>(eventClass, event);
+    public static Builder builder() {
+        return new Builder();
     }
 }
