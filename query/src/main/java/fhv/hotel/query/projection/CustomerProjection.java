@@ -15,10 +15,16 @@ public class CustomerProjection {
     CustomerServicePanache customerServicePanache;
 
     public List<CustomerResponseDTO> getCustomers() {
-        return customerServicePanache.getCustomers().stream().map(CustomerQueryPanacheModel::toDTO).toList();
+        return customerServicePanache.getCustomers()
+                .stream()
+                .map(CustomerQueryPanacheModel::toDTO)
+                .toList();
     }
 
     public List<CustomerResponseDTO> getCustomersByName(String name) {
-        return customerServicePanache.getCustomersByName(name).stream().map(CustomerQueryPanacheModel::toDTO).toList();
+        return customerServicePanache.getCustomersByName(name)
+                .stream()
+                .map(CustomerQueryPanacheModel::toDTO)
+                .toList();
     }
 }
