@@ -21,11 +21,4 @@ public class BookingProjection {
                 .map(BookingQueryPanacheModel::toDTO)
                 .toList();
     }
-
-    public List<BookingResponseDTO> getFreeRooms(LocalDate from, LocalDate to, Integer personCount) {
-        return bookingServicePanache.getFreeRooms(from, to, personCount)
-                .stream()
-                .map(BookingQueryPanacheModel::toDTO)
-                .toList();
-    }
 }

@@ -1,7 +1,5 @@
 package fhv.hotel.query.model;
 
-import fhv.hotel.command.model.domain.Customer;
-import fhv.hotel.command.model.domain.Room;
 import fhv.hotel.query.dto.BookingResponseDTO;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.Entity;

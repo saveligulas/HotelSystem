@@ -30,18 +30,4 @@ public class BookingQueryController {
         List<BookingResponseDTO> bookings = bookingProjection.getBookings(from, to);
         return Response.ok(bookings).build();
     }
-
-    @GET
-    @Path("/getFreeRooms")
-    public Response getFreeRooms(
-            @QueryParam("start") String startDate,
-            @QueryParam("end") String endDate,
-            @QueryParam("people") Integer peopleCount) {
-
-        LocalDate from = startDate != null ? LocalDate.parse(startDate) : null;
-        LocalDate to = endDate != null ? LocalDate.parse(endDate) : null;
-
-        List<BookingResponseDTO> freeRooms = bookingProjection.getFreeRooms(from, to, peopleCount);
-        return Response.ok(freeRooms).build();
-    }
 }

@@ -25,18 +25,6 @@ public class BookingServicePanache {
         ).list();
     }
 
-    public List<BookingQueryPanacheModel> getFreeRooms(LocalDate from, LocalDate to, Integer personCount) {
-        if (from == null || to == null) {
-            return BookingQueryPanacheModel.listAll();
-        }
-
-        // TODO: implement properly when rooms are done
-        return BookingQueryPanacheModel.find(
-                "fromDate > ?1 or toDate < ?2",
-                to, from
-        ).list();
-    }
-
     public Optional<BookingQueryPanacheModel> getBookingByUUID(UUID uuid) {
         if (uuid == null) {
             throw new IllegalArgumentException("UUID cannot be null.");
