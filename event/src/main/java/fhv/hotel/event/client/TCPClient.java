@@ -20,14 +20,18 @@ public class TCPClient implements IPublishEvent {
     private final Queue<IEventModel> pendingEvents = new LinkedList<>();
 
     public TCPClient(Vertx vertx, IReceiveByteMessage... receivers) {
-        start(vertx, receivers);
+        start(vertx, false, receivers);
     }
 
-    void start(Vertx vertx, IReceiveByteMessage... receivers) {
+    public TCPClient(Vertx vertx, boolean rolloutRequested, IReceiveByteMessage... receivers) {
+        start(vertx, rolloutRequested, receivers);
+    }
+
+    void start(Vertx vertx, boolean rolloutRequested, IReceiveByteMessage... receivers) {
         NetClient client = vertx.createNetClient();
         client.connect(5672, "localhost", conn -> {
             if (conn.succeeded()) {
-                this.connection = new Connection(conn.result(), receivers);
+                this.connection = new Connection(conn.result(), rolloutRequested, receivers);
                 this.ready = true;
                 while (!this.pendingEvents.isEmpty()) {
                     connection.sendEvent(pendingEvents.poll());

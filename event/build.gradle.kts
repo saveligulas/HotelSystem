@@ -19,6 +19,9 @@ dependencies {
     implementation("io.quarkus:quarkus-vertx")
     implementation("com.esotericsoftware.kryo:kryo5:5.6.2")
     implementation(project(":core"))
+    implementation("io.quarkus:quarkus-jdbc-postgresql")
+    implementation("io.quarkus:quarkus-hibernate-orm")
+    implementation("io.quarkus:quarkus-hibernate-orm-panache")
     testImplementation("io.quarkus:quarkus-junit5")
     testImplementation("io.rest-assured:rest-assured")
 }

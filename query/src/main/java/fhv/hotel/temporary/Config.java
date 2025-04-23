@@ -18,6 +18,6 @@ public class Config {
 
     @PostConstruct
     public void initClient() {
-        TCPClient client = new TCPClient(vertx, receiver);
+        TCPClient client = new TCPClient(vertx, true, receiver);
     }
 }

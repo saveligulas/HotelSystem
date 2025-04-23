@@ -1,6 +1,6 @@
 package fhv.hotel.event.server;
 
-import fhv.hotel.event.client.TCPClient;
+import fhv.hotel.event.repo.IEventSourcingRepository;
 import io.quarkus.logging.Log;
 import io.quarkus.runtime.Startup;
 import io.vertx.core.Vertx;
@@ -41,7 +41,7 @@ public class TCPServer {
     }
 
     private void handleNewConnection(NetSocket socket) {
-        Connection connection = new Connection(socket, eventSourcingRepository, consumerRegistry, publisher);
+        Connection connection = new Connection(socket, vertx, eventSourcingRepository, consumerRegistry, publisher);
         connections.put(socket, connection);
 
         socket.handler(buffer -> {
