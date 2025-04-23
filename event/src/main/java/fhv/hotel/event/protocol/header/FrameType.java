@@ -1,7 +1,7 @@
 package fhv.hotel.event.protocol.header;
 
 public enum FrameType {
-    CONNECTION((byte) 1),
+    REGISTERING_CONSUMERS((byte) 1),
     PUBLISH((byte) 2),
     CONSUME((byte) 3);
 

@@ -4,8 +4,8 @@ import com.esotericsoftware.kryo.kryo5.minlog.Log;
 import fhv.hotel.core.event.bytebased.IReceiveByteMessage;
 import fhv.hotel.core.model.IEventModel;
 import fhv.hotel.core.kryo.KryoSerializer;
-import fhv.hotel.event.protocol.header.Header;
-import fhv.hotel.event.protocol.header.Payload;
+import fhv.hotel.event.protocol.header.Frame;
+import fhv.hotel.event.protocol.header.FrameType;
 import fhv.hotel.event.utility.HexConverter;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.net.NetSocket;
@@ -15,10 +15,8 @@ import java.util.List;
 
 class Connection {
     private enum State {
-        SENDING_CONSUMER_TYPES,
-        SENDING_PUBLISHER_TYPES,
         CONNECTED,
-        CLOSED;
+        CLOSED
     }
 
     private final NetSocket socket;
@@ -34,43 +32,102 @@ class Connection {
             doSetup(rolloutRequested, receivers);
             this.receivers = Arrays.asList(receivers);
         }
-
     }
 
     private void doSetup(boolean rolloutRequested, IReceiveByteMessage[] receivers) {
-        Buffer buffer = Buffer.buffer();
-        if (rolloutRequested) {
-            buffer.appendBytes(new byte[] {0x01, 0x00, 0x00}); // setting first byte to notify server to send rollout events
-        } else {
-            buffer.appendBytes(Header.EMPTY_HEADER);
-        }
-
+        byte[] payload = new byte[0];
         for (IReceiveByteMessage receiver : receivers) {
-            buffer.appendBytes(receiver.getEventTypeIds());
+            byte[] eventTypeIds = receiver.getEventTypeIds();
+            byte[] newPayload = new byte[payload.length + eventTypeIds.length];
+            
+            System.arraycopy(payload, 0, newPayload, 0, payload.length);
+            System.arraycopy(eventTypeIds, 0, newPayload, payload.length, eventTypeIds.length);
+            
+            payload = newPayload;
         }
-        socket.write(buffer);
+        
+        Frame.Builder frameBuilder = Frame.builder()
+                .setType(FrameType.REGISTERING_CONSUMERS)
+                .setPayload(payload);
+                
+        Frame frame = frameBuilder.build();
+        
+        if (rolloutRequested) {
+            // Set the second byte in the header to 0x01 to indicate rollout request
+            frame.getBuffer().setByte(1, (byte) 0x01);
+        }
+        
+        Log.info("Sending registration frame: " + HexConverter.toHex(frame.getBytes()));
+        socket.write(frame.getBuffer());
     }
 
     public void handleIncomingData(Buffer data) {
         Log.info("Received data: " + HexConverter.toHex(data.getBytes()));
-        if (!state.equals(State.CONNECTED)) {
-            throw new IllegalStateException("Connection is not connected and can not receive data yet");
+        if (state != State.CONNECTED) {
+            throw new IllegalStateException("Connection is not connected and cannot receive data yet");
         }
 
-        byte eventType = data.getByte(0); // published events have their header stripped
-
-        for (IReceiveByteMessage receiver : receivers) {
-            if (receiver.handlesType(eventType)) {
-                receiver.receiveAndProcess(data.getBytes());
+        List<Frame> frames = Frame.splitBuffer(data);
+        Log.info("Split into " + frames.size() + " frames");
+        
+        for (Frame frame : frames) {
+            Log.info("Processing frame type: " + frame.getType() + ", size: " + frame.getSize() + 
+                     ", payload size: " + frame.getPayloadBytes().length);
+            
+            if (frame.getType() == FrameType.CONSUME) {
+                processConsumeFrame(frame);
             }
         }
     }
 
+    private void processConsumeFrame(Frame frame) {
+        byte[] payload = frame.getPayloadBytes();
+        if (payload.length == 0) {
+            Log.warn("Received empty payload in CONSUME frame");
+            return;
+        }
+
+        byte eventType = payload[0];
+        Log.info("Received event of type: " + eventType + " with payload length: " + payload.length);
+
+        Log.info("Received event: " + HexConverter.toHex(payload));
+
+        if (payload.length <= 1) {
+            Log.warn("Payload too short: " + HexConverter.toHex(payload));
+            return;
+        }
+        
+        boolean handled = false;
+        for (IReceiveByteMessage receiver : receivers) {
+            if (receiver.handlesType(eventType)) {
+                try {
+                    Log.info("Found handler for event type: " + eventType);
+                    receiver.receiveAndProcess(payload);
+                    handled = true;
+                } catch (Exception e) {
+                    Log.error("Error processing event", e);
+                }
+            }
+        }
+        
+        if (!handled) {
+            Log.warn("No handler found for event type: " + eventType);
+        }
+    }
+
     public void sendEvent(IEventModel model) {
-        Buffer buffer = Buffer.buffer();
-        buffer.appendBytes(Header.EMPTY_HEADER);
-        buffer.appendByte(model.getEventType());
-        buffer.appendBytes(serializer.serialize(model));
-        socket.write(buffer);
+        byte[] serializedModel = serializer.serialize(model);
+
+        byte[] payload = new byte[1 + serializedModel.length];
+        payload[0] = model.getEventType();
+        System.arraycopy(serializedModel, 0, payload, 1, serializedModel.length);
+        
+        Frame frame = Frame.builder()
+                .setType(FrameType.PUBLISH)
+                .setPayload(payload)
+                .build();
+                
+        Log.info("Sending event frame: " + HexConverter.toHex(frame.getBytes()));
+        socket.write(frame.getBuffer());
     }
 }

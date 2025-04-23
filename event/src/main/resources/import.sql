@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS byte_events (
+CREATE TABLE IF NOT EXISTS event.byte_events (
                                            id UUID NOT NULL,
                                            created_at TIMESTAMP(6),
                                            event OID NOT NULL,

@@ -1,6 +1,7 @@
 package fhv.hotel.event.server;
 
-import fhv.hotel.event.protocol.header.Payload;
+import fhv.hotel.event.protocol.header.Frame;
+import fhv.hotel.event.protocol.header.FrameType;
 import fhv.hotel.event.repo.IEventSourcingRepository;
 import fhv.hotel.event.utility.HexConverter;
 import io.quarkus.logging.Log;
@@ -14,11 +15,8 @@ import java.util.List;
 class Connection {
     public enum State {
         INITIAL,
-        CONSUMER_TYPES_RECEIVED,
-        PUBLISHER_TYPES_RECEIVED,
-        CHANNELS_RECEIVED,
         CONNECTED,
-        CLOSED;
+        CLOSED
     }
 
     private final NetSocket socket;
@@ -28,8 +26,8 @@ class Connection {
     private Publisher publisher;
     private IEventSourcingRepository eventSourcingRepository;
 
-
-    public Connection(NetSocket socket, Vertx vertx, IEventSourcingRepository eventSourcingRepository, ConsumerRegistry consumerRegistry, Publisher publisher) {
+    public Connection(NetSocket socket, Vertx vertx, IEventSourcingRepository eventSourcingRepository, 
+                     ConsumerRegistry consumerRegistry, Publisher publisher) {
         this.socket = socket;
         this.vertx = vertx;
         this.state = State.INITIAL;
@@ -40,89 +38,107 @@ class Connection {
 
     public void handleIncomingData(Buffer data) {
         Log.info("Received data: " + HexConverter.toHex(data.getBytes()));
+        
+        List<Frame> frames = Frame.splitBuffer(data);
+        for (Frame frame : frames) {
+            processFrame(frame);
+        }
+    }
+    
+    private void processFrame(Frame frame) {
         switch (state) {
-            case INITIAL -> handleConsumerTypes(data);
-            //case CONSUMER_TYPES_RECEIVED -> handlePublisherTypes(data);
-            //case PUBLISHER_TYPES_RECEIVED -> handleChannelsReceived(data); //skipping this for now
-            case CONNECTED -> handleDataFrame(data);
+            case INITIAL:
+                if (frame.getType() == FrameType.REGISTERING_CONSUMERS) {
+                    handleConsumerRegistration(frame);
+                }
+                break;
+            case CONNECTED:
+                if (frame.getType() == FrameType.PUBLISH) {
+                    handlePublishFrame(frame);
+                }
+                break;
         }
     }
 
-    private void handleDataFrame(Buffer data) {
-        Byte identifier = Payload.getPublishType(data);
-        byte[] payload = Payload.getPayload(data);
-        byte[] classByteCode = Payload.getClassByteCode(data);
-
-        vertx.executeBlocking(() -> {
-                    // This code runs on a worker thread
-                    eventSourcingRepository.saveByteEvent(identifier, payload);
-                    return null;
-                })
-                .onSuccess(result -> {
-                    // This runs on the event loop
-                    publisher.publish(Buffer.buffer(payload), identifier);
-                })
-                .onFailure(error -> {
-                    Log.error("Failed to save event", error);
-                });
-    }
-
-    private void handleConsumerTypes(Buffer data) {
-        state = State.CONNECTED;
-        boolean rolloutRequested = false;
-        if (data.getByte(0) == 0x01) { // if first byte is set, consumer requests event rollout
-            rolloutRequested = true;
-        }
-
-        byte[] payload = Payload.getPayload(data);
-        for (byte b : payload) {
-            consumerRegistry.add(b, this.socket);
-        }
-
-        if (rolloutRequested) {
-            handleRollout(payload);
-        }
-    }
-
-    private void handleRollout(byte[] payload) {
-        List<Byte> typeIdentifiers = new ArrayList<>();
-        for (byte b : payload) {
-            typeIdentifiers.add(b);
-        }
-
-        processNextIdentifier(typeIdentifiers, 0);
-    }
-
-    private void processNextIdentifier(List<Byte> identifiers, int index) {
-        if (index >= identifiers.size()) {
+    private void handlePublishFrame(Frame frame) {
+        byte[] payload = frame.getPayloadBytes();
+        if (payload.length == 0) {
             return;
         }
 
-        Byte currentIdentifier = identifiers.get(index);
+        byte eventType = payload[0];
 
         vertx.executeBlocking(() -> {
-                    return eventSourcingRepository.getByteEventsByTypeAscending(currentIdentifier);
-                })
-                .onSuccess(events -> {
-                    for (byte[] event : events) {
-                        Log.info("Writing Rollout event: " + HexConverter.toHex(event));
-                        socket.write(Buffer.buffer(event));
-                    }
-
-                    processNextIdentifier(identifiers, index + 1);
-                })
-                .onFailure(error -> {
-                    Log.error("Failed to retrieve events for type: " + currentIdentifier, error);
-                    // Continue with next identifier despite error
-                    processNextIdentifier(identifiers, index + 1);
-                });
+                eventSourcingRepository.saveByteEvent(eventType, payload);
+                return null;
+            })
+            .onSuccess(result -> {
+                publisher.publish(Buffer.buffer(payload), eventType);
+            })
+            .onFailure(error -> {
+                Log.error("Failed to save event", error);
+            });
     }
 
-    private void handlePublisherTypes(Buffer data) {
-        state = State.CONNECTED; //change this to PUBLISHER_TYPES_RECEIVED once channels received is implemented correctly
-    }
-
-    private void handleChannelsReceived(Buffer data) {
+    private void handleConsumerRegistration(Frame frame) {
         state = State.CONNECTED;
+        byte[] payload = frame.getPayloadBytes();
+        
+        // Check second byte in header (position 1) for rollout request flag
+        boolean rolloutRequested = frame.getBuffer().getByte(1) == 0x01;
+        
+        Log.info("Consumer registration frame received. Rollout requested: " + rolloutRequested + 
+                ", Payload length: " + payload.length);
+
+        List<Byte> registeredTypes = new ArrayList<>();
+        for (byte b : payload) {
+            consumerRegistry.add(b, this.socket);
+            registeredTypes.add(b);
+            Log.info("Registered consumer for event type: " + b);
+        }
+
+        if (rolloutRequested) {
+            handleRollout(registeredTypes);
+        }
+    }
+
+    private void handleRollout(List<Byte> typeIdentifiers) {
+        Log.info("Starting rollout for " + typeIdentifiers.size() + " event types");
+        
+        for (Byte eventType : typeIdentifiers) {
+            processEventsForType(eventType);
+        }
+    }
+
+    private void processEventsForType(byte eventType) {
+        Log.info("Processing rollout for event type: " + eventType);
+
+        vertx.executeBlocking(() -> {
+                return eventSourcingRepository.getByteEventsByTypeAscending(eventType);
+            })
+            .onSuccess(events -> {
+                Log.info("Retrieved " + events.size() + " events for type " + eventType);
+                
+                for (byte[] eventData : events) {
+                    sendRolloutEvent(eventType, eventData);
+                }
+            })
+            .onFailure(error -> {
+                Log.error("Failed to retrieve events for type: " + eventType, error);
+            });
+    }
+    
+    private void sendRolloutEvent(byte eventType, byte[] eventData) {
+        Log.info("Sending rollout event of type: " + eventType + ", data length: " + eventData.length);
+        
+        Frame frame = Frame.builder()
+                .setType(FrameType.CONSUME)
+                .setPayload(eventData)
+                .build();
+        
+        Log.debug("Sending frame: " + HexConverter.toHex(frame.getBytes()));
+        
+        // Send the frame
+        socket.write(frame.getBuffer());
     }
 }

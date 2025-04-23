@@ -1,4 +1,4 @@
-package fhv.hotel.event.utility;
+package fhv.hotel.core.utility;
 
 public final class HexConverter {
 

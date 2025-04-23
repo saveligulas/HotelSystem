@@ -1,9 +1,11 @@
 package fhv.hotel.core.event.bytebased;
 
 import com.esotericsoftware.kryo.kryo5.Kryo;
+import com.esotericsoftware.kryo.kryo5.minlog.Log;
 import fhv.hotel.core.event.IConsumeEvent;
 import fhv.hotel.core.model.IEventModel;
 import fhv.hotel.core.kryo.KryoSerializer;
+import fhv.hotel.core.utility.HexConverter;
 import org.jboss.logging.Logger;
 
 import java.util.*;
@@ -54,6 +56,8 @@ public class KryoEventReceiver implements IReceiveByteMessage {
 
     @Override
     public void receiveAndProcess(byte[] message) {
+        Log.info("Received event: " + HexConverter.toHex(message));
+
         if (message == null || message.length <= 1) {
             LOG.warn("Received empty or invalid message");
             return;

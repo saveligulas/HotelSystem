@@ -2,6 +2,7 @@ package fhv.hotel.event.protocol.header;
 
 import io.vertx.core.buffer.Buffer;
 
+@Deprecated
 public class Payload {
     public static byte getPublishType(Buffer buffer) {
         return buffer.getByte(Header.HEADER_SIZE);
