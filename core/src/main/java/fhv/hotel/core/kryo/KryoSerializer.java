@@ -1,20 +1,25 @@
-package fhv.hotel.core.utility;
+package fhv.hotel.core.kryo;
 
 import com.esotericsoftware.kryo.kryo5.Kryo;
 import com.esotericsoftware.kryo.kryo5.io.Input;
 import com.esotericsoftware.kryo.kryo5.io.Output;
 
 import java.io.ByteArrayOutputStream;
+import java.util.function.Consumer;
 
 public class KryoSerializer {
     private final Kryo kryo;
 
     public KryoSerializer() {
-        this.kryo = new Kryo();
+        this.kryo = StandardKryoConfig.get();
     }
 
-    public KryoSerializer(Kryo kryo) {
-        this.kryo = kryo;
+    public void registerClass(Class<?> clazz) {
+        kryo.register(clazz);
+    }
+
+    public void configureKryo(Consumer<Kryo> configurator) {
+        configurator.accept(kryo);
     }
 
     public <T> byte[] serialize(T object) {

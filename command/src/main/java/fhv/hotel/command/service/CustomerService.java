@@ -19,7 +19,7 @@ public class CustomerService {
     IBasicRepository<Customer, UUID> customerRepository;
 
     @Inject
-    IPublishEvent<CustomerCreatedEvent> customerCreatedPublisher;
+    IPublishEvent eventPublisher;
 
     public void createCustomer(CustomerCreate customerCreate) {
         Customer customer = new Customer(
@@ -31,7 +31,7 @@ public class CustomerService {
             new ArrayList<>()
         );
         customerRepository.save(customer);
-        customerCreatedPublisher.publish(new CustomerCreatedEvent(
+        eventPublisher.publish(new CustomerCreatedEvent(
             LocalDateTime.now(), 
             customer.uuid(), 
             customer.customerNumber(), 

@@ -1,10 +1,11 @@
 package fhv.hotel.event.server;
 
+import fhv.hotel.event.protocol.header.Header;
 import fhv.hotel.event.protocol.header.Payload;
+import fhv.hotel.event.utility.HexConverter;
 import io.quarkus.logging.Log;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.net.NetSocket;
-import jakarta.inject.Inject;
 
 class Connection {
     public enum State {
@@ -18,23 +19,21 @@ class Connection {
 
     private final NetSocket socket;
     private State state;
-
-    @Inject
-    Publisher publisher;
-    @Inject
-    ConsumerRegistry consumerRegistry;
-
+    private ConsumerRegistry consumerRegistry;
+    private Publisher publisher;
     private IEventSourcingRepository eventSourcingRepository;
 
 
-    public Connection(NetSocket socket, IEventSourcingRepository eventSourcingRepository) {
+    public Connection(NetSocket socket, IEventSourcingRepository eventSourcingRepository, ConsumerRegistry consumerRegistry, Publisher publisher) {
         this.socket = socket;
         state = State.INITIAL;
         this.eventSourcingRepository = eventSourcingRepository;
+        this.consumerRegistry = consumerRegistry;
+        this.publisher = publisher;
     }
 
     public void handleIncomingData(Buffer data) {
-        Log.info("Received data: " + data);
+        Log.info("Received data: " + HexConverter.toHex(data.getBytes()));
         switch (state) {
             case INITIAL -> handleConsumerTypes(data);
             //case CONSUMER_TYPES_RECEIVED -> handlePublisherTypes(data);
@@ -45,13 +44,19 @@ class Connection {
 
     private void handleDataFrame(Buffer data) {
         Byte identifier = Payload.getPublishType(data);
+        byte[] payload = Payload.getPayload(data);
         byte[] classByteCode = Payload.getClassByteCode(data);
-        eventSourcingRepository.saveByteEvent(identifier, classByteCode);
 
+        eventSourcingRepository.saveByteEvent(identifier, classByteCode);
+        publisher.publish(Buffer.buffer(payload), identifier);
     }
 
     private void handleConsumerTypes(Buffer data) {
         state = State.CONNECTED;
+        byte[] payload = Payload.getPayload(data);
+        for (byte b : payload) {
+            consumerRegistry.add(b, this.socket);
+        }
     }
 
     private void handlePublisherTypes(Buffer data) {

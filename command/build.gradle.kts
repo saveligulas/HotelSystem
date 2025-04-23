@@ -19,6 +19,8 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind")
     implementation("io.quarkus:quarkus-smallrye-openapi")
     implementation(project(":core"))
+    implementation(project(":event"))
+    implementation("io.quarkus:quarkus-vertx")
     testImplementation("io.quarkus:quarkus-junit5")
     testImplementation("io.rest-assured:rest-assured")
 }

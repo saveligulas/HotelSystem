@@ -19,6 +19,8 @@ dependencies {
     implementation(project(":core"))
     implementation("io.quarkus:quarkus-jdbc-h2")
     implementation("io.quarkus:quarkus-hibernate-orm")
+    implementation(project(":event"))
+    implementation("io.quarkus:quarkus-vertx")
     testImplementation("io.quarkus:quarkus-junit5")
     testImplementation("io.rest-assured:rest-assured")
 }

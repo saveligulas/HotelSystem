@@ -13,4 +13,6 @@ public class ExampleResource {
     public String hello() {
         return "Hello from Quarkus REST";
     }
+
+
 }
