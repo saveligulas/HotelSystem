@@ -1,12 +1,17 @@
 package fhv.hotel.core.model;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record RoomBookedEvent(LocalDateTime localDateTime,
-                              UUID eventUUID,
+                              UUID customerUUID,
+                              Long bookingNumber,
+                              Boolean paid,
+                              Boolean cancelled,
                               Long roomNumber,
-                              UUID customerUUID) implements IEventModel {
+                              LocalDate startDate,
+                              LocalDate endDate) implements IEventModel {
     public static final Event EVENT = Event.ROOM_BOOKED;
 
     @Override

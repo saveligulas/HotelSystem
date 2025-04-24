@@ -1,5 +1,6 @@
 package fhv.hotel.query.service;
 
+import fhv.hotel.core.model.CustomerCreatedEvent;
 import fhv.hotel.query.model.CustomerQueryPanacheModel;
 import io.quarkus.hibernate.orm.panache.Panache;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -43,7 +44,15 @@ public class CustomerServicePanache {
     }
 
     @Transactional
-    public void createCustomer(CustomerQueryPanacheModel customer) {
+    public void createCustomer(CustomerCreatedEvent event) {
+        CustomerQueryPanacheModel customer = new CustomerQueryPanacheModel(
+                event.customerUUID(),
+                event.dateTime(),
+                event.customerNumber(),
+                event.firstName(),
+                event.lastName(),
+                event.birthday()
+        );
         customer.persist();
     }
 

@@ -21,6 +21,21 @@ public class BookingQueryPanacheModel extends PanacheEntityBase {
     public LocalDate startDate;
     public LocalDate endDate;
 
+    public BookingQueryPanacheModel() {
+
+    }
+
+    public BookingQueryPanacheModel(UUID uuid, Long bookingNumber, Boolean paid, Boolean cancelled, Long roomNumber, UUID customerUUID, LocalDate startDate, LocalDate endDate) {
+        this.uuid = uuid;
+        this.bookingNumber = bookingNumber;
+        this.paid = paid;
+        this.cancelled = cancelled;
+        this.roomNumber = roomNumber;
+        this.customerUUID = customerUUID;
+        this.startDate = startDate;
+        this.endDate = endDate;
+    }
+
     public BookingResponseDTO toDTO() {
         return new BookingResponseDTO(
                 this.bookingNumber,

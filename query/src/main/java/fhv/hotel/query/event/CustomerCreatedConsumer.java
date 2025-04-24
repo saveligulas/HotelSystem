@@ -1,14 +1,19 @@
-package fhv.hotel.temporary;
+package fhv.hotel.query.event;
 
 import fhv.hotel.core.event.IConsumeEvent;
 import fhv.hotel.core.model.CustomerCreatedEvent;
+import fhv.hotel.query.service.CustomerServicePanache;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 @Singleton
-public class TestConsumer implements IConsumeEvent<CustomerCreatedEvent> {
+public class CustomerCreatedConsumer implements IConsumeEvent<CustomerCreatedEvent> {
+    @Inject
+    CustomerServicePanache customerServicePanache;
+
     @Override
     public void consume(CustomerCreatedEvent event) {
-        System.out.println("Customer Created Event" + event);
+        customerServicePanache.createCustomer(event);
     }
 
     @Override
