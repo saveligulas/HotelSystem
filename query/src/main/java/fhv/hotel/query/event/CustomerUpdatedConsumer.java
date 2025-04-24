@@ -1,31 +1,33 @@
 package fhv.hotel.query.event;
 
 import fhv.hotel.core.event.IConsumeEvent;
-import fhv.hotel.core.model.CustomerCreatedEvent;
+import fhv.hotel.core.model.CustomerUpdatedEvent;
 import fhv.hotel.query.model.CustomerQueryPanacheModel;
 import fhv.hotel.query.service.CustomerServicePanache;
 import io.quarkus.logging.Log;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
+import java.util.Optional;
+
 @Singleton
-public class CustomerCreatedConsumer implements IConsumeEvent<CustomerCreatedEvent> {
+public class CustomerUpdatedConsumer implements IConsumeEvent<CustomerUpdatedEvent> {
     @Inject
     CustomerServicePanache customerServicePanache;
 
     @Override
-    public void consume(CustomerCreatedEvent event) {
+    public void consume(CustomerUpdatedEvent event) {
         // Map the event to a Panache model
         CustomerQueryPanacheModel customerModel = mapEventToModel(event);
         
         // Pass the Panache model to the service
-        customerServicePanache.createCustomer(customerModel);
+        customerServicePanache.updateCustomer(customerModel);
         
-        Log.info("Created customer with UUID: " + customerModel.customerUUID);
+        Log.info("Updated customer with UUID: " + customerModel.customerUUID);
     }
 
-    private CustomerQueryPanacheModel mapEventToModel(CustomerCreatedEvent event) {
-        return new CustomerQueryPanacheModel(
+    private CustomerQueryPanacheModel mapEventToModel(CustomerUpdatedEvent event) {
+        CustomerQueryPanacheModel model = new CustomerQueryPanacheModel(
             event.customerUUID(),
             event.dateTime(),
             event.customerNumber(),
@@ -33,10 +35,12 @@ public class CustomerCreatedConsumer implements IConsumeEvent<CustomerCreatedEve
             event.lastName(),
             event.birthday()
         );
+        
+        return model;
     }
 
     @Override
-    public Class<CustomerCreatedEvent> getEventClass() {
-        return CustomerCreatedEvent.class;
+    public Class<CustomerUpdatedEvent> getEventClass() {
+        return CustomerUpdatedEvent.class;
     }
 }

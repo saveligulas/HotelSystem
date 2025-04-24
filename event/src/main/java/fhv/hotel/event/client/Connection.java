@@ -7,6 +7,7 @@ import fhv.hotel.core.kryo.KryoSerializer;
 import fhv.hotel.event.protocol.header.Frame;
 import fhv.hotel.event.protocol.header.FrameType;
 import fhv.hotel.event.utility.HexConverter;
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.net.NetSocket;
 
@@ -20,13 +21,15 @@ class Connection {
     }
 
     private final NetSocket socket;
+    private final Vertx vertx;
     private final KryoSerializer serializer = new KryoSerializer();
     private State state;
     private List<IReceiveByteMessage> receivers;
 
-    public Connection(NetSocket socket, boolean rolloutRequested, IReceiveByteMessage... receivers) {
+    public Connection(NetSocket socket, Vertx vertx, boolean rolloutRequested, IReceiveByteMessage... receivers) {
         this.socket = socket;
-        state = State.CONNECTED;
+        this.vertx = vertx;
+        this.state = State.CONNECTED;
         socket.handler(this::handleIncomingData);
         if (receivers != null) {
             doSetup(rolloutRequested, receivers);
@@ -97,22 +100,33 @@ class Connection {
             return;
         }
         
-        boolean handled = false;
         for (IReceiveByteMessage receiver : receivers) {
             if (receiver.handlesType(eventType)) {
-                try {
-                    Log.info("Found handler for event type: " + eventType);
-                    receiver.receiveAndProcess(payload);
-                    handled = true;
-                } catch (Exception e) {
-                    Log.error("Error processing event", e);
-                }
+                final byte[] eventData = payload;
+                final IReceiveByteMessage eventReceiver = receiver;
+                
+                vertx.executeBlocking(() -> {
+                    try {
+                        Log.info("Processing event of type: " + eventType + " in worker thread");
+                        eventReceiver.receiveAndProcess(eventData);
+                        return true;
+                    } catch (Exception e) {
+                        Log.error("Error processing event", e);
+                        return false;
+                    }
+                })
+                .onSuccess(result -> {
+                    Log.info("Successfully processed event of type: " + eventType);
+                })
+                .onFailure(error -> {
+                    Log.error("Failed to process event of type: " + eventType, error);
+                });
+                
+                return; // Process with the first matching receiver
             }
         }
         
-        if (!handled) {
-            Log.warn("No handler found for event type: " + eventType);
-        }
+        Log.warn("No handler found for event type: " + eventType);
     }
 
     public void sendEvent(IEventModel model) {

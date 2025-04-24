@@ -1,7 +1,5 @@
 package fhv.hotel.query.service;
 
-import fhv.hotel.core.event.bytebased.IReceiveByteMessage;
-import fhv.hotel.core.model.RoomBookedEvent;
 import fhv.hotel.query.model.BookingQueryPanacheModel;
 import io.quarkus.hibernate.orm.panache.Panache;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -35,18 +33,7 @@ public class BookingServicePanache {
     }
 
     @Transactional
-    public void createBooking(RoomBookedEvent event) {
-        BookingQueryPanacheModel model = new BookingQueryPanacheModel(
-                UUID.randomUUID(),
-                event.bookingNumber(),
-                event.paid(),
-                event.cancelled(),
-                event.roomNumber(),
-                event.customerUUID(),
-                event.startDate(),
-                event.endDate()
-        );
-
+    public void createBooking(BookingQueryPanacheModel model) {
         model.persist();
     }
 

@@ -1,11 +1,10 @@
 package fhv.hotel.query.event;
 
 import fhv.hotel.core.event.IConsumeEvent;
-import fhv.hotel.core.model.BookingPaidEvent;
+import fhv.hotel.core.model.BookingCancelledEvent;
 import fhv.hotel.query.model.BookingQueryPanacheModel;
 import fhv.hotel.query.service.BookingServicePanache;
 import io.quarkus.logging.Log;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
@@ -13,14 +12,14 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 
 @Singleton
-public class BookingPaidConsumer implements IConsumeEvent<BookingPaidEvent> {
+public class BookingCancelledConsumer implements IConsumeEvent<BookingCancelledEvent> {
     
     @Inject
     BookingServicePanache bookingServicePanache;
     
     @Override
     @Transactional
-    public void consume(BookingPaidEvent event) {
+    public void consume(BookingCancelledEvent event) {
         // Find bookings with the given room number
         List<BookingQueryPanacheModel> bookings = BookingQueryPanacheModel.find(
                 "roomNumber = ?1", 
@@ -32,19 +31,19 @@ public class BookingPaidConsumer implements IConsumeEvent<BookingPaidEvent> {
             return;
         }
         
-        // Update the paid status for each booking
+        // Update the cancelled status for each booking
         for (BookingQueryPanacheModel booking : bookings) {
-            booking.paid = true;
+            booking.cancelled = true;
             
             // Use the service to update the booking
             bookingServicePanache.updateBooking(booking);
             
-            Log.info("Updated booking with UUID: " + booking.uuid + " as paid");
+            Log.info("Updated booking with UUID: " + booking.uuid + " as cancelled");
         }
     }
 
     @Override
-    public Class<BookingPaidEvent> getEventClass() {
-        return BookingPaidEvent.class;
+    public Class<BookingCancelledEvent> getEventClass() {
+        return BookingCancelledEvent.class;
     }
 }

@@ -1,9 +1,9 @@
 package fhv.hotel.event.client;
 
+import com.esotericsoftware.kryo.kryo5.minlog.Log;
 import fhv.hotel.core.event.IPublishEvent;
 import fhv.hotel.core.event.bytebased.IReceiveByteMessage;
 import fhv.hotel.core.model.IEventModel;
-import io.quarkus.logging.Log;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.net.NetClient;
@@ -31,7 +31,7 @@ public class TCPClient implements IPublishEvent {
         NetClient client = vertx.createNetClient();
         client.connect(5672, "localhost", conn -> {
             if (conn.succeeded()) {
-                this.connection = new Connection(conn.result(), rolloutRequested, receivers);
+                this.connection = new Connection(conn.result(), vertx, rolloutRequested, receivers);
                 this.ready = true;
                 while (!this.pendingEvents.isEmpty()) {
                     connection.sendEvent(pendingEvents.poll());
