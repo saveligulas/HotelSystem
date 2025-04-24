@@ -3,6 +3,7 @@ package fhv.hotel.event.utility;
 import java.util.HashMap;
 import java.util.Map;
 
+// unused because hashing was dismissed
 public class EventClassConverter {
 
     public static Map<Byte, String> parse(byte[] data) {

@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+@Deprecated
 public class ClassHasher {
     public static byte[] hashClass(Class<?> clazz) {
         String resourceName = "/" + clazz.getName().replace('.', '/') + ".class";
