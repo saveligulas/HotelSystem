@@ -29,21 +29,21 @@ The system separates **command operations** (write) from **query operations** (r
 
 Contains shared components used across the application:
 
-- **Event Models**: `CustomerCreatedEvent`, `RoomBookedEvent`, etc.
+- **Event Models**: [`CustomerCreatedEvent`](core/src/main/java/fhv/hotel/core/model/CustomerCreatedEvent.java), [`RoomBookedEvent`](core/src/main/java/fhv/hotel/core/model/RoomBookedEvent.java), etc.
 - **Common Interfaces**: 
-  - `IEventModel`: Base contract for all events
-  - `IBasicRepository`: Repository pattern abstraction
-  - `IPublishEvent`: Event publishing interface
-  - `IConsumeEvent`: Event consumption interface
+  - [`IEventModel`](core/src/main/java/fhv/hotel/core/model/IEventModel.java): Base contract for all events
+  - [`IBasicRepository`](core/src/main/java/fhv/hotel/core/repo/IBasicRepository.java): Repository pattern abstraction
+  - [`IPublishEvent`](core/src/main/java/fhv/hotel/core/event/IPublishEvent.java): Event publishing interface
+  - [`IConsumeEvent`](core/src/main/java/fhv/hotel/core/event/IConsumeEvent.java): Event consumption interface
 
 ### Custom Event Bus
 
 The application features a custom TCP-based event bus implementation:
 
 - **Server-Client Architecture**:
-  - `TCPServer`: Central event router that runs as a standalone service
-  - `TCPClient`: Used by both command and query modules to connect to the server
-  - `Connection`: Manages the communication channel between clients and server
+  - [`TCPServer`](event/src/main/java/fhv/hotel/event/server/TCPServer.java): Central event router that runs as a standalone service
+  - [`TCPClient`](event/src/main/java/fhv/hotel/event/client/TCPClient.java): Used by both command and query modules to connect to the server
+  - [`Connection`](event/src/main/java/fhv/hotel/event/server/Connection.java): Manages the communication channel between clients and server
 
 - **Protocol**: Uses a custom protocol for efficiently transmitting events between components
 
@@ -53,9 +53,9 @@ The application features a custom TCP-based event bus implementation:
 
 Uses a custom in-memory repository implementation:
 
-- `InMemoryBookingRepository`, `InMemoryCustomerRepository`, etc.
-- Implements the `IBasicRepository` interface
-- Utilizes the `ShallowProjection` pattern to efficiently handle object relationships
+- [`InMemoryBookingRepository`](command/src/main/java/fhv/hotel/command/repo/InMemoryBookingRepository.java), [`InMemoryCustomerRepository`](command/src/main/java/fhv/hotel/command/repo/InMemoryCustomerRepository.java), etc.
+- Implements the [`IBasicRepository`](core/src/main/java/fhv/hotel/core/repo/IBasicRepository.java) interface
+- Utilizes the [`IShallowProjection`](command/src/main/java/fhv/hotel/command/model/domain/IShallowProjection.java) pattern to efficiently handle object relationships
 - Prevents infinite reference loops when storing complex domain objects
 - Allows for 1-deep relation depiction if retrieved
 
@@ -63,7 +63,7 @@ Uses a custom in-memory repository implementation:
 
 Uses Hibernate Panache for object persistence:
 
-- `BookingQueryPanacheModel`, `CustomerQueryPanacheModel`, etc.
+- [`BookingQueryPanacheModel`](query/src/main/java/fhv/hotel/query/model/BookingQueryPanacheModel.java), [`CustomerQueryPanacheModel`](query/src/main/java/fhv/hotel/query/model/CustomerQueryPanacheModel.java), etc.
 - JPA annotations for entity mapping
 - Optimized structures for query performance
 
@@ -71,11 +71,11 @@ Uses Hibernate Panache for object persistence:
 
 Events flow through the system in the following way:
 
-1. **Publication**: Command side produces events via `IPublishEvent`
+1. **Publication**: Command side produces events via [`IPublishEvent`](core/src/main/java/fhv/hotel/core/event/IPublishEvent.java)
 2. **Transmission**: Events are sent over the TCP Event Bus
-3. **Reception**: Query side receives events via `IReceiveByteMessage`
-4. **Routing**: `IReceiveByteMessage` then routes events to appropriate consumers
-5. **Consumption**: Event-specific consumers (`IConsumeEvent`) update query models
+3. **Reception**: Query side receives events via [`IReceiveByteMessage`](core/src/main/java/fhv/hotel/core/event/bytebased/IReceiveByteMessage.java)
+4. **Routing**: [`EventListener`](core/src/main/java/fhv/hotel/core/event/EventListener.java) routes events to appropriate consumers
+5. **Consumption**: Event-specific consumers ([`IConsumeEvent`](core/src/main/java/fhv/hotel/core/event/IConsumeEvent.java)) update query models
 
 ## Setting Up and Running the Application
 
@@ -111,7 +111,7 @@ This runs the services in the correct order:
 
 When starting the query server, you can enable initial data rollout to populate the database with events:
 
-1. Open `query/src/main/java/fhv/hotel/query/event/EventConfig.java`
+1. Open [`query/src/main/java/fhv/hotel/query/event/EventConfig.java`](query/src/main/java/fhv/hotel/query/event/EventConfig.java)
 2. In the `initClient()` method, set the second parameter to `true` in the TCPClient constructor:
    ```java
    TCPClient client = new TCPClient(vertx, true, byteMessageReceiver);
@@ -132,24 +132,24 @@ Once the services are running:
 
 ### Command Side
 
-- **Customer**: Personal information and booking history
-- **Room**: Hotel room details including number, name, description, and price
-- **Booking**: Reservation linking a customer to a room for specific dates
+- **Customer**: [`Customer`](command/src/main/java/fhv/hotel/command/model/domain/Customer.java) - Personal information and booking history
+- **Room**: [`Room`](command/src/main/java/fhv/hotel/command/model/domain/Room.java) - Hotel room details including number, name, description, and price
+- **Booking**: [`Booking`](command/src/main/java/fhv/hotel/command/model/domain/Booking.java) - Reservation linking a customer to a room for specific dates
 
 ### Query Side
 
 Specialized models optimized for specific query patterns:
 
-- **BookingQueryPanacheModel**: Flat representation of bookings
-- **CustomerQueryPanacheModel**: Customer data optimized for queries
-- **RoomQueryPanacheModel**: Room information for availability checks
+- **BookingQueryPanacheModel**: [`BookingQueryPanacheModel`](query/src/main/java/fhv/hotel/query/model/BookingQueryPanacheModel.java) - Flat representation of bookings
+- **CustomerQueryPanacheModel**: [`CustomerQueryPanacheModel`](query/src/main/java/fhv/hotel/query/model/CustomerQueryPanacheModel.java) - Customer data optimized for queries
+- **RoomQueryPanacheModel**: [`RoomQueryPanacheModel`](query/src/main/java/fhv/hotel/query/model/RoomQueryPanacheModel.java) - Room information for availability checks
 
 ## Event Types
 
 The system uses various events to propagate changes:
 
-- **Customer Events**: `CustomerCreatedEvent`, `CustomerUpdatedEvent`
-- **Room Events**: `RoomCreatedEvent`, `RoomUpdatedEvent`
-- **Booking Events**: `RoomBookedEvent`, `BookingPaidEvent`, `BookingCancelledEvent`
+- **Customer Events**: [`CustomerCreatedEvent`](core/src/main/java/fhv/hotel/core/model/CustomerCreatedEvent.java), [`CustomerUpdatedEvent`](core/src/main/java/fhv/hotel/core/model/CustomerUpdatedEvent.java)
+- **Room Events**: [`RoomCreatedEvent`](core/src/main/java/fhv/hotel/core/model/RoomCreatedEvent.java), [`RoomUpdatedEvent`](core/src/main/java/fhv/hotel/core/model/RoomUpdatedEvent.java)
+- **Booking Events**: [`RoomBookedEvent`](core/src/main/java/fhv/hotel/core/model/RoomBookedEvent.java), [`BookingPaidEvent`](core/src/main/java/fhv/hotel/core/model/BookingPaidEvent.java), [`BookingCancelledEvent`](core/src/main/java/fhv/hotel/core/model/BookingCancelledEvent.java)
 
 Each event contains the relevant data needed for the query side to update its models.
