@@ -34,7 +34,9 @@ public class CustomerService {
             customerCreate.address(),
             new ArrayList<>()
         );
+
         customerRepository.save(customer);
+
         eventPublisher.publish(new CustomerCreatedEvent(
             LocalDateTime.now(), 
             customer.uuid(), 

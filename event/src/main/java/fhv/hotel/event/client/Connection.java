@@ -31,14 +31,14 @@ class Connection {
         this.vertx = vertx;
         this.state = State.CONNECTED;
         socket.handler(this::handleIncomingData);
-        if (receivers != null) {
+        if (receivers != null) { // this is useless bc array parameter gives us an empty array if set to null
             doSetup(rolloutRequested, receivers);
             this.receivers = Arrays.asList(receivers);
         }
     }
 
     private void doSetup(boolean rolloutRequested, IReceiveByteMessage[] receivers) {
-        byte[] payload = new byte[0];
+        byte[] payload = new byte[0]; // can be removed, is artifact from when rolloutRequested was in the payload
         for (IReceiveByteMessage receiver : receivers) {
             byte[] eventTypeIds = receiver.getEventTypeIds();
             byte[] newPayload = new byte[payload.length + eventTypeIds.length];
