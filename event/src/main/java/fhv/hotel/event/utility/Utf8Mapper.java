@@ -2,6 +2,7 @@ package fhv.hotel.event.utility;
 
 import java.nio.charset.StandardCharsets;
 
+@Deprecated // moved to Hex representation
 public final class Utf8Mapper {
     public static byte[] toBytes(String input) {
         if (input == null) {
