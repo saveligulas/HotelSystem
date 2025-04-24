@@ -19,18 +19,20 @@ public class CustomerQueryPanacheModel extends PanacheEntityBase {
     public String firstName;
     public String lastName;
     public LocalDate birthday;
+    public String address;
 
     public CustomerQueryPanacheModel() {
 
     }
 
-    public CustomerQueryPanacheModel(UUID customerUUID, LocalDateTime dateTime, Long customerNumber, String firstName, String lastName, LocalDate birthday) {
+    public CustomerQueryPanacheModel(UUID customerUUID, LocalDateTime dateTime, Long customerNumber, String firstName, String lastName, LocalDate birthday, String address) {
         this.customerUUID = customerUUID;
         this.dateTime = dateTime;
         this.customerNumber = customerNumber;
         this.firstName = firstName;
         this.lastName = lastName;
         this.birthday = birthday;
+        this.address = address;
     }
 
     public CustomerResponseDTO toDTO() {
@@ -39,7 +41,8 @@ public class CustomerQueryPanacheModel extends PanacheEntityBase {
                 this.customerNumber,
                 this.firstName,
                 this.lastName,
-                this.birthday
+                this.birthday,
+                this.address
         );
     }
 }

@@ -1,4 +1,4 @@
-package fhv.hotel.command;
+package fhv.hotel.command.controller;
 
 import fhv.hotel.command.model.RoomCreate;
 import fhv.hotel.command.model.RoomUpdate;
@@ -7,6 +7,7 @@ import fhv.hotel.command.service.RoomService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import org.eclipse.microprofile.openapi.annotations.Operation;
 
 @Path("/room")
 @Produces(MediaType.APPLICATION_JSON)
@@ -23,6 +24,7 @@ public class RoomResource {
 
     @GET
     @Path("/{roomNumber}")
+    @Operation(summary = "Only for testing purposes")
     public Room getRoom(@PathParam("roomNumber") Long roomNumber) {
         return roomService.getRoom(roomNumber);
     }

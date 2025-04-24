@@ -17,6 +17,7 @@ public class Customer implements IShallowProjection<Customer, UUID> {
     private String firstName;
     private String lastName;
     private LocalDate birthday;
+    private String address;
     @JsonManagedReference
     private List<Booking> bookings;
 
@@ -24,12 +25,13 @@ public class Customer implements IShallowProjection<Customer, UUID> {
         this.uuid = uuid;
     }
 
-    public Customer(UUID uuid, Long customerNumber, String firstName, String lastName, LocalDate birthday, List<Booking> bookings) {
+    public Customer(UUID uuid, Long customerNumber, String firstName, String lastName, LocalDate birthday, String address, List<Booking> bookings) {
         this.uuid = uuid;
         this.customerNumber = customerNumber;
         this.firstName = firstName;
         this.lastName = lastName;
         this.birthday = birthday;
+        this.address = address;
         this.bookings = bookings;
     }
 
@@ -42,6 +44,8 @@ public class Customer implements IShallowProjection<Customer, UUID> {
     public String lastName() { return lastName; }
 
     public LocalDate birthday() { return birthday; }
+    
+    public String address() { return address; }
 
     public List<Booking> bookings() { return bookings; }
 
@@ -60,6 +64,7 @@ public class Customer implements IShallowProjection<Customer, UUID> {
                 firstName == null &&
                 lastName == null &&
                 birthday == null &&
+                address == null &&
                 bookings == null;
     }
 

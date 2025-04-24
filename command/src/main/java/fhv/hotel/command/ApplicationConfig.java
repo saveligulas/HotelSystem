@@ -1,7 +1,5 @@
 package fhv.hotel.command;
 
-import fhv.hotel.core.event.EventListener;
-import fhv.hotel.core.event.IPublishEvent;
 import fhv.hotel.event.client.TCPClient;
 import io.vertx.core.Vertx;
 import jakarta.enterprise.context.ApplicationScoped;

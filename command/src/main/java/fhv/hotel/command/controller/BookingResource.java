@@ -1,4 +1,4 @@
-package fhv.hotel.command;
+package fhv.hotel.command.controller;
 
 import fhv.hotel.command.model.BookingCreate;
 import fhv.hotel.command.model.domain.Booking;
@@ -6,6 +6,7 @@ import fhv.hotel.command.service.BookingService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import org.eclipse.microprofile.openapi.annotations.Operation;
 
 import java.util.UUID;
 
@@ -24,14 +25,15 @@ public class BookingResource {
 
     @GET
     @Path("/{id}")
+    @Operation(summary = "Only for testing purposes")
     public Booking getBooking(@PathParam("id") UUID id) {
         return bookingService.getBooking(id);
     }
     
     @PUT
     @Path("/{id}/pay")
-    public void payBooking(@PathParam("id") UUID id) {
-        bookingService.payBooking(id);
+    public void payBooking(@PathParam("id") UUID id, @QueryParam("paymentOption") String paymentOption) {
+        bookingService.payBooking(id, paymentOption);
     }
     
     @PUT

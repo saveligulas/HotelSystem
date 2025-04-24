@@ -29,7 +29,8 @@ public class RoomBookedEventConsumer implements IConsumeEvent<RoomBookedEvent> {
             event.roomNumber(),
             event.customerUUID(),
             event.startDate(),
-            event.endDate()
+            event.endDate(),
+            event.paymentOption()
         );
     }
 

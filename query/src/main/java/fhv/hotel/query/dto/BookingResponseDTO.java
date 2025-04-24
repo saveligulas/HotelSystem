@@ -8,5 +8,6 @@ public record BookingResponseDTO(
         Boolean cancelled,
         Long roomNumber,
         LocalDate startDate,
-        LocalDate endDate
+        LocalDate endDate,
+        String paymentOption
 ) {}

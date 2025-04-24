@@ -5,7 +5,9 @@ public enum Event {
     BOOKING_CANCELLED,
     CUSTOMER_CREATED,
     CUSTOMER_UPDATED,
-    BOOKING_PAID;
+    BOOKING_PAID,
+    ROOM_CREATED,
+    ROOM_UPDATED;
 
     public byte getOrdinalByte() {
         return (byte) this.ordinal();

@@ -21,12 +21,13 @@ public class Booking implements IShallowProjection<Booking, UUID> {
     private Customer customer;
     private LocalDate startDate;
     private LocalDate endDate;
+    private String paymentOption;
 
     public Booking(UUID uuid) {
         this.uuid = uuid;
     }
 
-    public Booking(UUID uuid, Long bookingNumber, boolean paid, boolean cancelled, Room room, Customer customer, LocalDate startDate, LocalDate endDate) {
+    public Booking(UUID uuid, Long bookingNumber, boolean paid, boolean cancelled, Room room, Customer customer, LocalDate startDate, LocalDate endDate, String paymentOption) {
         this.uuid = uuid;
         this.bookingNumber = bookingNumber;
         this.paid = paid;
@@ -35,6 +36,7 @@ public class Booking implements IShallowProjection<Booking, UUID> {
         this.customer = customer;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.paymentOption = paymentOption;
     }
 
     public UUID uuid() {
@@ -67,6 +69,10 @@ public class Booking implements IShallowProjection<Booking, UUID> {
 
     public LocalDate endDate() {
         return endDate;
+    }
+
+    public String paymentOption() {
+        return paymentOption;
     }
 
     public void setRoom(Room room) {

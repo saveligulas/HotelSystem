@@ -50,7 +50,8 @@ public class InMemoryBookingRepository implements IBasicRepository<Booking, UUID
                 booking.room().buildShallowModel(booking.room().roomNumber()),
                 booking.customer().buildShallowModel(booking.customer().uuid()),
                 booking.startDate(),
-                booking.endDate()
+                booking.endDate(),
+                booking.paymentOption()
         );
 
         bookingStore.put(booking.uuid(), bookingShallow);

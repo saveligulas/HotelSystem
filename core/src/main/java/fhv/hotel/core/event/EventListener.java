@@ -8,6 +8,7 @@ import org.jboss.logging.Logger;
 import java.util.HashMap;
 import java.util.Map;
 
+@Deprecated
 public class EventListener {
 
     private static final Logger LOG = Logger.getLogger(EventListener.class);

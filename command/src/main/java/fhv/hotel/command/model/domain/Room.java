@@ -10,6 +10,7 @@ public class Room implements IShallowProjection<Room, Long> {
     private Long roomNumber;
     private String roomName;
     private String description;
+    private Double price;
     @JsonManagedReference
     private List<Booking> bookings;
 
@@ -18,10 +19,11 @@ public class Room implements IShallowProjection<Room, Long> {
         this.roomNumber = roomNumber;
     }
 
-    public Room(Long roomNumber, String roomName, String description, List<Booking> bookings) {
+    public Room(Long roomNumber, String roomName, String description, Double price, List<Booking> bookings) {
         this.roomNumber = roomNumber;
         this.roomName = roomName;
         this.description = description;
+        this.price = price;
         this.bookings = bookings;
     }
 
@@ -35,6 +37,10 @@ public class Room implements IShallowProjection<Room, Long> {
 
     public String description() {
         return description;
+    }
+    
+    public Double price() {
+        return price;
     }
 
     public List<Booking> bookings() {
@@ -52,6 +58,7 @@ public class Room implements IShallowProjection<Room, Long> {
         return roomNumber != null &&
                 roomName == null &&
                 description == null &&
+                price == null &&
                 bookings == null;
     }
 

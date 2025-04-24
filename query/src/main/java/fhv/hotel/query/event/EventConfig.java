@@ -32,6 +32,12 @@ public class EventConfig {
     
     @Inject
     IConsumeEvent<BookingCancelledEvent> bookingCancelledConsumer;
+    
+    @Inject
+    IConsumeEvent<RoomCreatedEvent> roomCreatedConsumer;
+    
+    @Inject
+    IConsumeEvent<RoomUpdatedEvent> roomUpdatedConsumer;
 
     @PostConstruct
     public void initClient() {
@@ -41,6 +47,8 @@ public class EventConfig {
                 .registerConsumer(RoomBookedEvent.EVENT.getOrdinalByte(), RoomBookedEvent.class, roomBookedEventConsumer)
                 .registerConsumer(BookingPaidEvent.EVENT.getOrdinalByte(), BookingPaidEvent.class, bookingPaidConsumer)
                 .registerConsumer(BookingCancelledEvent.EVENT.getOrdinalByte(), BookingCancelledEvent.class, bookingCancelledConsumer)
+                .registerConsumer(RoomCreatedEvent.EVENT.getOrdinalByte(), RoomCreatedEvent.class, roomCreatedConsumer)
+                .registerConsumer(RoomUpdatedEvent.EVENT.getOrdinalByte(), RoomUpdatedEvent.class, roomUpdatedConsumer)
                 .build();
                 
         TCPClient client = new TCPClient(vertx, true, byteMessageReceiver);

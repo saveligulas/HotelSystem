@@ -5,7 +5,8 @@ import java.util.UUID;
 
 public record BookingPaidEvent(LocalDateTime localDateTime,
                                UUID bookingUUID,
-                               Long roomNumber) implements IEventModel {
+                               Long roomNumber,
+                               String paymentOption) implements IEventModel {
     public static final Event EVENT = Event.BOOKING_PAID;
 
     @Override

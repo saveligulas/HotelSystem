@@ -43,7 +43,8 @@ public class BookingService {
             room,
             customer,
             bookingCreate.startDate(),
-            bookingCreate.endDate()
+            bookingCreate.endDate(),
+            null // No payment option when creating
         );
 
         bookingRepository.save(booking);
@@ -62,7 +63,8 @@ public class BookingService {
             booking.cancelled(),
             room.roomNumber(),
             booking.startDate(),
-            booking.endDate()
+            booking.endDate(),
+            null // Initialize with null payment option
         ));
         
         return bookingId;
@@ -72,7 +74,7 @@ public class BookingService {
         return bookingRepository.findById(id);
     }
 
-    public void payBooking(UUID id) {
+    public void payBooking(UUID id, String paymentOption) {
         Booking booking = bookingRepository.findById(id);
         Booking updatedBooking = new Booking(
             booking.uuid(),
@@ -82,14 +84,16 @@ public class BookingService {
             booking.room(),
             booking.customer(),
             booking.startDate(),
-            booking.endDate()
+            booking.endDate(),
+            paymentOption
         );
         bookingRepository.update(updatedBooking);
         
         eventPublisher.publish(new BookingPaidEvent(
             LocalDateTime.now(),
             booking.uuid(),
-            booking.room().roomNumber()
+            booking.room().roomNumber(),
+            paymentOption
         ));
     }
 
@@ -103,7 +107,8 @@ public class BookingService {
             booking.room(),
             booking.customer(),
             booking.startDate(),
-            booking.endDate()
+            booking.endDate(),
+            booking.paymentOption()
         );
         bookingRepository.update(updatedBooking);
         

@@ -5,5 +5,6 @@ import java.time.LocalDate;
 public record CustomerCreate(
     String firstName,
     String lastName,
-    LocalDate birthday
+    LocalDate birthday,
+    String address
 ) {}

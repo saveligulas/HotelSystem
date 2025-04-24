@@ -31,6 +31,7 @@ public class CustomerService {
             customerCreate.firstName(), 
             customerCreate.lastName(), 
             customerCreate.birthday(), 
+            customerCreate.address(),
             new ArrayList<>()
         );
         customerRepository.save(customer);
@@ -40,7 +41,8 @@ public class CustomerService {
             customer.customerNumber(), 
             customer.firstName(), 
             customer.lastName(), 
-            customer.birthday()
+            customer.birthday(),
+            customer.address()
         ));
         
         return customerId;
@@ -58,6 +60,7 @@ public class CustomerService {
             customerUpdate.firstName(),
             customerUpdate.lastName(),
             customerUpdate.birthday(),
+            customerUpdate.address(),
             existingCustomer.bookings()
         );
         customerRepository.update(updatedCustomer);
@@ -68,7 +71,8 @@ public class CustomerService {
             updatedCustomer.customerNumber(),
             updatedCustomer.firstName(),
             updatedCustomer.lastName(),
-            updatedCustomer.birthday()
+            updatedCustomer.birthday(),
+            updatedCustomer.address()
         ));
     }
 }

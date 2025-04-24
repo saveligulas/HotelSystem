@@ -20,12 +20,13 @@ public class BookingQueryPanacheModel extends PanacheEntityBase {
     public UUID customerUUID;
     public LocalDate startDate;
     public LocalDate endDate;
+    public String paymentOption;
 
     public BookingQueryPanacheModel() {
 
     }
 
-    public BookingQueryPanacheModel(UUID uuid, Long bookingNumber, Boolean paid, Boolean cancelled, Long roomNumber, UUID customerUUID, LocalDate startDate, LocalDate endDate) {
+    public BookingQueryPanacheModel(UUID uuid, Long bookingNumber, Boolean paid, Boolean cancelled, Long roomNumber, UUID customerUUID, LocalDate startDate, LocalDate endDate, String paymentOption) {
         this.uuid = uuid;
         this.bookingNumber = bookingNumber;
         this.paid = paid;
@@ -34,6 +35,7 @@ public class BookingQueryPanacheModel extends PanacheEntityBase {
         this.customerUUID = customerUUID;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.paymentOption = paymentOption;
     }
 
     public BookingResponseDTO toDTO() {
@@ -43,7 +45,8 @@ public class BookingQueryPanacheModel extends PanacheEntityBase {
                 this.cancelled,
                 this.roomNumber,
                 this.startDate,
-                this.endDate
+                this.endDate,
+                this.paymentOption
         );
     }
 }

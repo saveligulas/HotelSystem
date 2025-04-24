@@ -29,7 +29,8 @@ public class CustomerUpdatedConsumer implements IConsumeEvent<CustomerUpdatedEve
             event.customerNumber(),
             event.firstName(),
             event.lastName(),
-            event.birthday()
+            event.birthday(),
+            event.address()
         );
         
         return model;

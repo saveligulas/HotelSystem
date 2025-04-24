@@ -12,7 +12,8 @@ public record RoomBookedEvent(LocalDateTime localDateTime,
                               Boolean cancelled,
                               Long roomNumber,
                               LocalDate startDate,
-                              LocalDate endDate) implements IEventModel {
+                              LocalDate endDate,
+                              String paymentOption) implements IEventModel {
     public static final Event EVENT = Event.ROOM_BOOKED;
 
     @Override

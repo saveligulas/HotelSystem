@@ -27,7 +27,8 @@ public class CustomerCreatedConsumer implements IConsumeEvent<CustomerCreatedEve
             event.customerNumber(),
             event.firstName(),
             event.lastName(),
-            event.birthday()
+            event.birthday(),
+            event.address()
         );
     }
 

@@ -29,6 +29,8 @@ public class BookingPaidConsumer implements IConsumeEvent<BookingPaidEvent> {
 
         BookingQueryPanacheModel booking = bookingOptional.get();
         booking.paid = true;
+        // Set the payment option from the event
+        booking.paymentOption = event.paymentOption();
 
         bookingServicePanache.updateBooking(booking);
         

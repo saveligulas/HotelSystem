@@ -9,7 +9,8 @@ public record CustomerCreatedEvent(LocalDateTime dateTime,
                                    Long customerNumber,
                                    String firstName,
                                    String lastName,
-                                   LocalDate birthday) implements IEventModel {
+                                   LocalDate birthday,
+                                   String address) implements IEventModel {
     public static final Event EVENT = Event.CUSTOMER_CREATED;
 
     @Override

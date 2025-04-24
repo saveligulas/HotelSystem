@@ -8,6 +8,7 @@ public record CustomerResponseDTO(
         Long customerNumber,
         String firstName,
         String lastName,
-        LocalDate birthday
+        LocalDate birthday,
+        String address
 ) {
 }

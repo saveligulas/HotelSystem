@@ -39,6 +39,7 @@ public class InMemoryCustomerRepository implements IBasicRepository<Customer, UU
                 customer.firstName(),
                 customer.lastName(),
                 customer.birthday(),
+                customer.address(),
                 customer.bookings() == null ? new ArrayList<>() : 
                     customer.bookings().stream()
                         .filter(b -> b != null)

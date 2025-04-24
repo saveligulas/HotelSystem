@@ -43,6 +43,7 @@ public class InMemoryRoomRepository implements IBasicRepository<Room, Long> {
                 room.roomNumber(),
                 room.roomName(),
                 room.description(),
+                room.price(),
                 room.bookings() == null ? new ArrayList<>() : 
                     room.bookings().stream()
                         .filter(b -> b != null)
