@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record BookingPaidEvent(LocalDateTime localDateTime,
-                               UUID eventUUID,
+                               UUID bookingUUID,
                                Long roomNumber) implements IEventModel {
     public static final Event EVENT = Event.BOOKING_PAID;
 

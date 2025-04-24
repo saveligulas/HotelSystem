@@ -1,6 +1,7 @@
 package fhv.hotel.command;
 
 import fhv.hotel.command.model.CustomerCreate;
+import fhv.hotel.command.model.CustomerUpdate;
 import fhv.hotel.command.model.domain.Customer;
 import fhv.hotel.command.service.CustomerService;
 import jakarta.inject.Inject;
@@ -18,12 +19,19 @@ public class CustomerResource {
     CustomerService customerService;
 
     @POST
-    public void createCustomer(CustomerCreate customerCreate) {
-        customerService.createCustomer(customerCreate);
+    public UUID createCustomer(CustomerCreate customerCreate) {
+        return customerService.createCustomer(customerCreate);
     }
 
     @GET
-    public Customer getCustomer(@QueryParam("id") UUID id) {
+    @Path("/{id}")
+    public Customer getCustomer(@PathParam("id") UUID id) {
         return customerService.getCustomer(id);
+    }
+    
+    @PUT
+    @Path("/{id}")
+    public void updateCustomer(@PathParam("id") UUID id, CustomerUpdate customerUpdate) {
+        customerService.updateCustomer(id, customerUpdate);
     }
 }

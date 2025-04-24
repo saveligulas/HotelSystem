@@ -15,14 +15,16 @@ public class RoomService {
     @Inject
     IBasicRepository<Room, Long> roomRepository;
 
-    public void createRoom(RoomCreate roomCreate) {
+    public Long createRoom(RoomCreate roomCreate) {
+        Long roomNumber = roomCreate.roomNumber();
         Room room = new Room(
-            roomCreate.roomNumber(),
+            roomNumber,
             roomCreate.roomName(),
             roomCreate.description(),
             new ArrayList<>()
         );
         roomRepository.save(room);
+        return roomNumber;
     }
 
     public Room getRoom(Long roomNumber) {

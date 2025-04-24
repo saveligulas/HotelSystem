@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record RoomBookedEvent(LocalDateTime localDateTime,
+                              UUID bookingUUID,
                               UUID customerUUID,
                               Long bookingNumber,
                               Boolean paid,

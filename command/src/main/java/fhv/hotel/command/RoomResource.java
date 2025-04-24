@@ -17,8 +17,8 @@ public class RoomResource {
     RoomService roomService;
 
     @POST
-    public void createRoom(RoomCreate roomCreate) {
-        roomService.createRoom(roomCreate);
+    public Long createRoom(RoomCreate roomCreate) {
+        return roomService.createRoom(roomCreate);
     }
 
     @GET
@@ -33,4 +33,3 @@ public class RoomResource {
         roomService.updateRoom(roomNumber, roomUpdate);
     }
 }
-

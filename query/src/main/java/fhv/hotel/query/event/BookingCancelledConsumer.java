@@ -9,7 +9,8 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
 
-import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Singleton
 public class BookingCancelledConsumer implements IConsumeEvent<BookingCancelledEvent> {
@@ -20,26 +21,19 @@ public class BookingCancelledConsumer implements IConsumeEvent<BookingCancelledE
     @Override
     @Transactional
     public void consume(BookingCancelledEvent event) {
-        // Find bookings with the given room number
-        List<BookingQueryPanacheModel> bookings = BookingQueryPanacheModel.find(
-                "roomNumber = ?1", 
-                event.roomNumber()
-        ).list();
+        Optional<BookingQueryPanacheModel> bookingOptional = bookingServicePanache.getBookingByUUID(event.bookingUUID());
         
-        if (bookings.isEmpty()) {
-            Log.warn("No bookings found for room number: " + event.roomNumber());
+        if (bookingOptional.isEmpty()) {
+            Log.warn("No booking found with UUID: " + event.bookingUUID());
             return;
         }
+
+        BookingQueryPanacheModel booking = bookingOptional.get();
+        booking.cancelled = true;
+
+        bookingServicePanache.updateBooking(booking);
         
-        // Update the cancelled status for each booking
-        for (BookingQueryPanacheModel booking : bookings) {
-            booking.cancelled = true;
-            
-            // Use the service to update the booking
-            bookingServicePanache.updateBooking(booking);
-            
-            Log.info("Updated booking with UUID: " + booking.uuid + " as cancelled");
-        }
+        Log.info("Updated booking with UUID: " + booking.uuid + " as cancelled");
     }
 
     @Override

@@ -39,7 +39,11 @@ public class InMemoryCustomerRepository implements IBasicRepository<Customer, UU
                 customer.firstName(),
                 customer.lastName(),
                 customer.birthday(),
-                customer.bookings().stream().map(b -> b.buildShallowModel(b.uuid())).collect(Collectors.toCollection(ArrayList::new))
+                customer.bookings() == null ? new ArrayList<>() : 
+                    customer.bookings().stream()
+                        .filter(b -> b != null)
+                        .map(b -> b.buildShallowModel(b.uuid()))
+                        .collect(Collectors.toCollection(ArrayList::new))
         );
 
         customerStore.put(customer.uuid(), customerShallow);
@@ -56,6 +60,16 @@ public class InMemoryCustomerRepository implements IBasicRepository<Customer, UU
     }
 
     public void retrieveCustomerFromBooking(Booking booking) {
-        booking.setCustomer(customerStore.get(booking.customer().getID()));
+        if (booking == null || booking.customer() == null) {
+            return;
+        }
+        
+        UUID customerId = booking.customer().getID();
+        if (customerId != null) {
+            Customer customer = customerStore.get(customerId);
+            if (customer != null) {
+                booking.setCustomer(customer);
+            }
+        }
     }
 }

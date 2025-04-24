@@ -5,12 +5,11 @@ import fhv.hotel.core.model.BookingPaidEvent;
 import fhv.hotel.query.model.BookingQueryPanacheModel;
 import fhv.hotel.query.service.BookingServicePanache;
 import io.quarkus.logging.Log;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.transaction.Transactional;
 
-import java.util.List;
+import java.util.Optional;
 
 @Singleton
 public class BookingPaidConsumer implements IConsumeEvent<BookingPaidEvent> {
@@ -21,26 +20,19 @@ public class BookingPaidConsumer implements IConsumeEvent<BookingPaidEvent> {
     @Override
     @Transactional
     public void consume(BookingPaidEvent event) {
-        // Find bookings with the given room number
-        List<BookingQueryPanacheModel> bookings = BookingQueryPanacheModel.find(
-                "roomNumber = ?1", 
-                event.roomNumber()
-        ).list();
+        Optional<BookingQueryPanacheModel> bookingOptional = bookingServicePanache.getBookingByUUID(event.bookingUUID());
         
-        if (bookings.isEmpty()) {
-            Log.warn("No bookings found for room number: " + event.roomNumber());
+        if (bookingOptional.isEmpty()) {
+            Log.warn("No booking found with UUID: " + event.bookingUUID());
             return;
         }
+
+        BookingQueryPanacheModel booking = bookingOptional.get();
+        booking.paid = true;
+
+        bookingServicePanache.updateBooking(booking);
         
-        // Update the paid status for each booking
-        for (BookingQueryPanacheModel booking : bookings) {
-            booking.paid = true;
-            
-            // Use the service to update the booking
-            bookingServicePanache.updateBooking(booking);
-            
-            Log.info("Updated booking with UUID: " + booking.uuid + " as paid");
-        }
+        Log.info("Updated booking with UUID: " + booking.uuid + " as paid");
     }
 
     @Override

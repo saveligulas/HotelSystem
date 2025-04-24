@@ -18,8 +18,8 @@ public class BookingResource {
     BookingService bookingService;
 
     @POST
-    public void createBooking(BookingCreate bookingCreate) {
-        bookingService.createBooking(bookingCreate);
+    public UUID createBooking(BookingCreate bookingCreate) {
+        return bookingService.createBooking(bookingCreate);
     }
 
     @GET
@@ -40,4 +40,3 @@ public class BookingResource {
         bookingService.cancelBooking(id);
     }
 }
-

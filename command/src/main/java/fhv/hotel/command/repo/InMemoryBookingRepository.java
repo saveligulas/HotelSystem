@@ -8,10 +8,12 @@ import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 import jakarta.inject.Singleton;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Singleton
 public class InMemoryBookingRepository implements IBasicRepository<Booking, UUID> {
@@ -65,20 +67,44 @@ public class InMemoryBookingRepository implements IBasicRepository<Booking, UUID
     }
 
     void retrieveBookingsFromCustomer(Customer customer) {
-        List<Booking> bookings = customer.bookings().stream().map(shallowBooking -> {
-            Booking booking = bookingStore.get(shallowBooking.uuid());
-            booking.setCustomer(customer);
-            return booking;
-        }).collect(java.util.stream.Collectors.toCollection(java.util.ArrayList::new));
+        if (customer == null || customer.bookings() == null) {
+            return;
+        }
+
+        List<Booking> bookings = customer.bookings().stream()
+            .filter(shallowBooking -> shallowBooking != null)
+            .map(shallowBooking -> {
+                Booking booking = bookingStore.get(shallowBooking.uuid());
+                if (booking != null) {
+                    booking.setCustomer(customer);
+                    return booking;
+                }
+                return null;
+            })
+            .filter(booking -> booking != null)
+            .collect(Collectors.toCollection(ArrayList::new));
+            
         customer.setBookings(bookings);
     }
 
     void retrieveBookingsFromRoom(Room room) {
-        List<Booking> bookings = room.bookings().stream().map(shallowBooking -> {
-            Booking booking = bookingStore.get(shallowBooking.uuid());
-            booking.setRoom(room);
-            return booking;
-        }).collect(java.util.stream.Collectors.toCollection(java.util.ArrayList::new));
+        if (room == null || room.bookings() == null) {
+            return;
+        }
+
+        List<Booking> bookings = room.bookings().stream()
+            .filter(shallowBooking -> shallowBooking != null)
+            .map(shallowBooking -> {
+                Booking booking = bookingStore.get(shallowBooking.uuid());
+                if (booking != null) {
+                    booking.setRoom(room);
+                    return booking;
+                }
+                return null;
+            })
+            .filter(booking -> booking != null)
+            .collect(Collectors.toCollection(ArrayList::new));
+            
         room.setBookings(bookings);
     }
 }

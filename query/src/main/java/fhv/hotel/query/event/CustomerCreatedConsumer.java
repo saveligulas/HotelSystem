@@ -15,12 +15,8 @@ public class CustomerCreatedConsumer implements IConsumeEvent<CustomerCreatedEve
 
     @Override
     public void consume(CustomerCreatedEvent event) {
-        // Map the event to a Panache model
         CustomerQueryPanacheModel customerModel = mapEventToModel(event);
-        
-        // Pass the Panache model to the service
         customerServicePanache.createCustomer(customerModel);
-        
         Log.info("Created customer with UUID: " + customerModel.customerUUID);
     }
 

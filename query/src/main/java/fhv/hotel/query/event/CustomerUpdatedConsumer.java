@@ -17,12 +17,8 @@ public class CustomerUpdatedConsumer implements IConsumeEvent<CustomerUpdatedEve
 
     @Override
     public void consume(CustomerUpdatedEvent event) {
-        // Map the event to a Panache model
         CustomerQueryPanacheModel customerModel = mapEventToModel(event);
-        
-        // Pass the Panache model to the service
         customerServicePanache.updateCustomer(customerModel);
-        
         Log.info("Updated customer with UUID: " + customerModel.customerUUID);
     }
 

@@ -43,7 +43,11 @@ public class InMemoryRoomRepository implements IBasicRepository<Room, Long> {
                 room.roomNumber(),
                 room.roomName(),
                 room.description(),
-                room.bookings().stream().map(b -> b.buildShallowModel(b.uuid())).collect(Collectors.toCollection(ArrayList::new))
+                room.bookings() == null ? new ArrayList<>() : 
+                    room.bookings().stream()
+                        .filter(b -> b != null)
+                        .map(b -> b.buildShallowModel(b.uuid()))
+                        .collect(Collectors.toCollection(ArrayList::new))
         );
 
         roomStore.put(room.roomNumber(), roomShallow);
@@ -55,11 +59,21 @@ public class InMemoryRoomRepository implements IBasicRepository<Room, Long> {
         if (oldRoom != null) {
             this.save(room);
         } else {
-            throw new IllegalArgumentException("Cannot update Customer that doesn't exist");
+            throw new IllegalArgumentException("Cannot update Room that doesn't exist");
         }
     }
 
     public void retrieveRoomFromBooking(Booking booking) {
-        booking.setRoom(roomStore.get(booking.room().roomNumber()));
+        if (booking == null || booking.room() == null) {
+            return;
+        }
+        
+        Long roomNumber = booking.room().roomNumber();
+        if (roomNumber != null) {
+            Room room = roomStore.get(roomNumber);
+            if (room != null) {
+                booking.setRoom(room);
+            }
+        }
     }
 }

@@ -8,8 +8,6 @@ import io.quarkus.logging.Log;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
-import java.util.UUID;
-
 @Singleton
 public class RoomBookedEventConsumer implements IConsumeEvent<RoomBookedEvent> {
     @Inject
@@ -17,18 +15,14 @@ public class RoomBookedEventConsumer implements IConsumeEvent<RoomBookedEvent> {
 
     @Override
     public void consume(RoomBookedEvent event) {
-        // Map the event to a Panache model
         BookingQueryPanacheModel bookingModel = mapEventToModel(event);
-        
-        // Pass the Panache model to the service
         bookingServicePanache.createBooking(bookingModel);
-        
         Log.info("Created booking with UUID: " + bookingModel.uuid + " for room: " + bookingModel.roomNumber);
     }
     
     private BookingQueryPanacheModel mapEventToModel(RoomBookedEvent event) {
         return new BookingQueryPanacheModel(
-            UUID.randomUUID(),
+            event.bookingUUID(), // Use the booking UUID from the event
             event.bookingNumber(),
             event.paid(),
             event.cancelled(),
